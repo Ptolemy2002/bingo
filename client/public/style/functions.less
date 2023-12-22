@@ -1,0 +1,99 @@
+@import "variables";
+
+.center-horizontal() {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.center-vertical() {
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.margin-x(@x) {
+	margin-left: @x;
+	margin-right: @x;
+}
+
+.margin-y(@y) {
+	margin-top: @y;
+	margin-bottom: @y;
+}
+
+.padding-x(@x) {
+	padding-left: @x;
+	padding-right: @x;
+}
+
+.padding-y(@y) {
+	padding-top: @y;
+	padding-bottom: @y;
+}
+
+.all-link-psuedo(@content) {
+	&:visited,
+	&:hover,
+	&:active {
+		@content();
+	}
+}
+
+.min-width(@min, @content) {
+	@media (min-width: @min) {
+		@content();
+	}
+}
+
+.max-width(@max, @content) {
+	@media (max-width: @max) {
+		@content();
+	}
+}
+
+.width-range(@min, @max, @content) {
+	.min-width(@min, {
+		.max-width(@max, {
+			@content();
+		});
+	});
+}
+
+/*
+    Apply the styling if the screen size is greater than or equal to the specified breakpoint.
+*/
+.bs-breakpoint-min(@name, @content) {
+	// This is a hack to interpolate the variable name.
+	@bp: ~"bs-breakpoint-@{name}";
+	.min-width(@@bp[@begin], {
+		@content();
+	});
+}
+
+/*
+	Apply the styling if the screen size is less than or equal to the specified breakpoint.
+*/
+.bs-breakpoint-max(@name, @content) {
+	// This is a hack to interpolate the variable name.
+	@bp: ~"bs-breakpoint-@{name}";
+	.max-width(@@bp[@end], {
+		@content();
+	});
+}
+
+/*
+    Apply the styling if the screen size is within the specified breakpoint range.
+*/
+.bs-breakpoint-range(@start, @end, @content) {
+	.bs-breakpoint-min(@start, {
+		.bs-breakpoint-max(@end, {
+			@content();
+		});
+	});
+}
+
+/*
+	Apply the styling if the screen size is exactly the specified breakpoint.
+*/
+.bs-breakpoint(@name, @content) {
+	.bs-breakpoint-range(@name, @name, @content)
+}
