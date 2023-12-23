@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { isNullOrUndefined } from "sec/lib/Misc";
+import { isNullOrUndefined } from "src/lib/Misc";
 import { nanoid } from "nanoid";
+import { useForceRerender } from "src/lib/Misc";
+import { BootstrapButton } from "./Bootstrap/Button";
 
 export function EditField({
     name,
@@ -79,16 +81,17 @@ export function EditField({
         <div className="btns-hor">
             {
                 !staticCustom ? (
-                    <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
+                    <BootstrapButton variant="secondary" ouline={true} onClick={() => setCustom(!custom)}>
                         {custom ? existingMessage : customMessage}
-                    </button>
+                    </BootstrapButton>
                 ) : null
             }
             
             {
                 custom ? null : (
-                    <button
-                        className="btn btn-outline-secondary"
+                    <BootstrapButton
+                        variant="secondary"
+                        outline={true}
                         onClick={refreshHandler}
                         disabled={listStatus.inProgress}
                     >
@@ -98,18 +101,19 @@ export function EditField({
                             // Else
                             refreshMessage
                         }
-                    </button>
+                    </BootstrapButton>
                 )
             }
 
             {
                 manualSave ? (
-                    <button 
-                        className="btn btn-outline-secondary"
+                    <BootstrapButton
+                        variant="secondary"
+                        outline={true} 
                         onClick={() => {if (setValueHandler) setValueHandler(value)}}
                     >
                         Save
-                    </button>
+                    </BootstrapButton>
                 ) : null
             }
         </div>
@@ -117,7 +121,7 @@ export function EditField({
 
     if (custom) {
         return (
-            <div className="form-group mb-1">
+            <div className="form-group mb-2">
                 <label htmlFor={name}><h6>{label}</h6></label>
                 <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={onChange} name={name} />
                 {optionsElement}
@@ -136,7 +140,7 @@ export function EditField({
                 </BootstrapAlert>
             );
         } else {
-            const choices = list.map((item, i) => {
+            const choices = list.current.map((item, i) => {
                 return (
                     <option key={"option-" + i} value={item}>{item}</option>
                 );
@@ -153,4 +157,138 @@ export function EditField({
             );
         }
     }
+}
+
+export function FieldList({
+    list: initList = [],
+    setList: setListHandler,
+    types: initTypeList = [],
+    typeMap = {},
+}) {
+    const listRef = useRef(initList);
+    const typeListRef = useRef(initTypeList);
+
+    const forceRerender = useForceRerender();
+
+    const types = Object.keys(typeMap);
+
+    function set(index, value) {
+        const newList = [...listRef.current];
+        newList[index] = value;
+        listRef.current = newList;
+        if (setListHandler) setListHandler(listRef.current);
+    }
+
+    function remove(index) {
+        const newList = [...listRef.current];
+        const newTypeList = [...typeListRef.current];
+
+        newList.splice(index, 1);
+        newTypeList.splice(index, 1);
+
+        listRef.current = newList;
+        typeListRef.current = newTypeList;
+
+        if (setListHandler) setListHandler(listRef.current);
+        forceRerender();
+    }
+
+    function moveUp(index) {
+        if (index === 0) return;
+
+        const newList = [...listRef.current];
+        const newTypeList = [...typeListRef.current];
+
+        const temp = newList[index];
+        newList[index] = newList[index - 1];
+        newList[index - 1] = temp;
+
+        const temp2 = newTypeList[index];
+        newTypeList[index] = newTypeList[index - 1];
+        newTypeList[index - 1] = temp2;
+
+        listRef.current = newList;
+        typeListRef.current = newTypeList;
+
+        if (setListHandler) setListHandler(listRef.current);
+        forceRerender();
+    }
+
+    function moveDown(index) {
+        if (index === listRef.current.length - 1) return;
+
+        const newList = [...listRef.current];
+        const newTypeList = [...typeListRef.current];
+
+        const temp = newList[index];
+        newList[index] = newList[index + 1];
+        newList[index + 1] = temp;
+
+        const temp2 = newTypeList[index];
+        newTypeList[index] = newTypeList[index + 1];
+        newTypeList[index + 1] = temp2;
+
+        listRef.current = newList;
+        typeListRef.current = newTypeList;
+
+        if (setListHandler) setListHandler(listRef.current);
+        forceRerender();
+    }
+
+    function add(type, value) {
+        const newList = [...listRef.current];
+        const newTypeList = [...typeListRef.current];
+
+        newList.push(value);
+        newTypeList.push(type);
+
+        listRef.current = newList;
+        typeListRef.current = newTypeList;
+
+        if (setListHandler) setListHandler(listRef.current);
+        forceRerender();
+    }
+
+    const elements = listRef.current.map((value, i) => {
+        const type = typeListRef.current[i];
+        const {elementFn} = typeMap[type];
+
+        return (
+            <div key={"field-list-" + nanoid()} className="edit-container mb-1">
+                {elementFn({
+                    value: value,
+                    setValue: (v) => set(i, v),
+                    remove: () => remove(i),
+                    moveUp: () => {
+                        moveUp(i)
+                    },
+                    moveDown: () => moveDown(i),
+                    isFirstChild: i === 0,
+                    isLastChild: i === listRef.current.length - 1
+                })}
+            </div>
+        );
+    });
+
+    const addButtons = types.map((type, i) => {
+        const {label} = typeMap[type];
+
+        return (
+            <BootstrapButton key={"add-button-" + nanoid()} variant="secondary" outline={true} onClick={() => add(type, "")}>
+                Add "{label}"
+            </BootstrapButton>
+        );
+    });
+
+    return (
+        <div className="field-list">
+            {elements}
+
+            <div className="mb-1">
+                <div className="btns-hor">
+                    {addButtons}
+                </div>
+            </div>
+        </div>
+    );
 }

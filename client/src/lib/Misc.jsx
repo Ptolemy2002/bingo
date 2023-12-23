@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export function listInPlainEnglish(list, max) {
     if (list.length === 0) {
@@ -56,4 +56,13 @@ export function arraysEqual(a, b) {
 
 export function isNullOrUndefined(v) {
     return v === null || v === undefined;
+}
+
+export function useForceRerender() {
+    const [, setTick] = useState(0);
+    const update = useCallback(() => {
+        setTick(tick => tick + 1);
+    }, []);
+
+    return update;
 }

@@ -11,7 +11,6 @@ export default function BootstrapAlert({
     ...props
 }) {
     const alert = useRef(null);
-    const transitionDuration = transitionDuration;
     const [shown, setShown] = useState(true);
 
     useMountEffect(() => {
