@@ -1,42 +1,73 @@
 import React, { useState } from "react";
-import BootstrapAlert from "./Bootstrap/Alert";
+import BootstrapAlert from "src/lib/Bootstrap/Alert";
+import { isNullOrUndefined } from "sec/lib/Misc";
+import { nanoid } from "nanoid";
 
-export function EditField(props) {
-    const [value, _setValue] = useState(props.value);
+export function EditField({
+    name,
+    label,
+
+    value: initValue = "",
+    setValue: setValueHandler,
+    defaultValue = "",
+
+    custom: initCustom = true,
+    staticCustom = true,
+    placeholder = "Enter a value",
+
+    number = false,
+    integer = false,
+    min = null,
+    max = null,
+    validate: _validate,
+
+    existingMessage = "Use Existing",
+    customMessage = "Use Custom",
+
+    list = [],
+    listStatus = {
+        inProgress: false,
+        completed: false,
+        failed: false,
+    },
+    refreshHandler = () => {},
+    refreshMessage = "Refresh",
+    inProgressMessage = "Loading...",
+    failedMessage = "Failed.",
+
+    manualSave = false,
+}) {
+    const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
-    const [custom, _setCustom] = useState(props.custom);
+    const [custom, _setCustom] = useState(initCustom);
     
     function setValue(v) {
         _setValue(v);
-        if (props.setValue && !props.manualSave) props.setValue(v);
+        if (setValueHandler && !manualSave) setValueHandler(v);
     }
 
     function setCustom(v) {
         _setCustom(v);
         if (v) {
             setPrevValue(value);
-            setValue(props.defaultValue);
+            setValue(defaultValue);
         } else {
             setValue(prevValue);
         }
     }
 
-    function isNullOrUndefined(v) {
-        return v === null || v === undefined;
-    }
-
     function validate(v) {
-        if (props.number || props.integer) {
+        if (number || integer) {
             if (v === "") return true;
-            if (v === "-" && (isNullOrUndefined(props.min) || props.min < 0)) return true;
-            if (v === "+" && (isNullOrUndefined(props.max) || props.max >= 0)) return true;
+            if (v === "-" && (isNullOrUndefined(min) || min < 0)) return true;
+            if (v === "+" && (isNullOrUndefined(max) || max >= 0)) return true;
             if (isNaN(v) || isNaN(parseFloat(v))) return false;
-            if (props.integer && !Number.isInteger(v)) return false;
-            if (!isNullOrUndefined(props.min) && v < props.min) return false;
-            if (!isNullOrUndefined(props.max) && v > props.max) return false;
+            if (integer && !Number.isInteger(v)) return false;
+            if (!isNullOrUndefined(min) && v < min) return false;
+            if (!isNullOrUndefined(max) && v > max) return false;
         }
 
-        return true;
+        return _validate ? _validate(v) : true;
     }
 
     function onChange(event) {
@@ -45,11 +76,11 @@ export function EditField(props) {
     }
 
     const optionsElement = (
-        <div className={props.optionsClassName}>
+        <div className="btns-hor">
             {
-                !props.staticCustom ? (
+                !staticCustom ? (
                     <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
-                        {custom ? props.existingMessage : props.customMessage}
+                        {custom ? existingMessage : customMessage}
                     </button>
                 ) : null
             }
@@ -58,24 +89,24 @@ export function EditField(props) {
                 custom ? null : (
                     <button
                         className="btn btn-outline-secondary"
-                        onClick={props.refreshHandler}
-                        disabled={props.listStatus.inProgress}
+                        onClick={refreshHandler}
+                        disabled={listStatus.inProgress}
                     >
                         {
-                            props.listStatus.inProgress ?
+                            listStatus.inProgress ?
                                 "Unavailable":
                             // Else
-                            props.refreshMessage
+                            refreshMessage
                         }
                     </button>
                 )
             }
 
             {
-                props.manualSave ? (
+                manualSave ? (
                     <button 
                         className="btn btn-outline-secondary"
-                        onClick={() => {if (props.setValue) props.setValue(value)}}
+                        onClick={() => {if (setValueHandler) setValueHandler(value)}}
                     >
                         Save
                     </button>
@@ -87,25 +118,25 @@ export function EditField(props) {
     if (custom) {
         return (
             <div className="form-group mb-1">
-                <label htmlFor={props.name}><h6>{props.label}</h6></label>
-                <input type="text" placeholder={props.placeholder} className="form-control" value={value} onChange={onChange} name={props.name} />
+                <label htmlFor={name}><h6>{label}</h6></label>
+                <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={onChange} name={name} />
                 {optionsElement}
             </div>
         );
     } else {
-        if (!props.listStatus.completed) {
+        if (!listStatus.completed) {
             return (
-                <p>{props.inProgressMessage}</p>
+                <p>{inProgressMessage}</p>
             );
-        } else if (props.listStatus.failed) {
+        } else if (listStatus.failed) {
             return (
                 <BootstrapAlert type="danger" allowDismiss={false}>
                     <BootstrapAlert.Heading>Error</BootstrapAlert.Heading>
-                    <p>{props.failedMessage}</p>
+                    <p>{failedMessage}</p>
                 </BootstrapAlert>
             );
         } else {
-            const choices = props.list.map((item, i) => {
+            const choices = list.map((item, i) => {
                 return (
                     <option key={"option-" + i} value={item}>{item}</option>
                 );
@@ -113,8 +144,8 @@ export function EditField(props) {
 
             return (
                 <div className="form-group mb-1">
-                    <label htmlFor={props.name}><h6>{props.label}</h6></label>
-                    <select className="form-control mb-1" value={value} onChange={onChange} name={props.name}>
+                    <label htmlFor={name}><h6>{label}</h6></label>
+                    <select className="form-control mb-1" value={value} onChange={onChange} name={name}>
                         {choices}
                     </select>
                     {optionsElement}

@@ -2,9 +2,16 @@ import React, { useRef, useState } from "react";
 import { combineClassNames, useMountEffect } from "src/lib/Misc";
 import { Link } from "react-router-dom";
 
-export default function BootstrapAlert(props) {
+export default function BootstrapAlert({
+    type = "primary",
+    allowDismiss = false,
+    transitionDuration = 500,
+    className = null,
+    children,
+    ...props
+}) {
     const alert = useRef(null);
-    const transitionDuration = props.transitionDuration || 500;
+    const transitionDuration = transitionDuration;
     const [shown, setShown] = useState(true);
 
     useMountEffect(() => {
@@ -25,23 +32,19 @@ export default function BootstrapAlert(props) {
     const newProps = {
         ...props,
         className: combineClassNames(
-            props.className,
+            className,
             "alert", `alert-${props.type}`,
-            props.allowDismiss ? "alert-dismissible fade show" : null,
+            allowDismiss ? "alert-dismissible fade show" : null,
             shown ? null : "d-none"
         ),
         role: "alert"
     };
-    // Delete props will be handled by us, not passed to the <div> tag
-    delete newProps.type;
-    delete newProps.allowDismiss;
-    delete newProps.transitionDuration;
 
     return (
         <div {...newProps} ref={alert}>
-            {props.children}
+            {children}
             {
-                props.allowDismiss ? (
+                allowDismiss ? (
                     <button className="btn-close" type="button" aria-label="Close" onClick={hide}></button>
                 ) : null
             }
@@ -49,33 +52,41 @@ export default function BootstrapAlert(props) {
     );
 }
 
-export function BootstrapAlertHeading(props) {
+export function BootstrapAlertHeading({
+    hLevel = 4,
+    className = null,
+    children,
+    ...props
+
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "alert-heading")
+        className: combineClassNames(className, "alert-heading")
     };
 
-    // Delete props will be handled by us, not passed to the <h> tag
-    delete newProps.hLevel;
-
     // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${props.hLevel || 4}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${hLevel || 4}`; //eslint-disable-line no-unused-vars
     return (
         <HTag {...newProps}>
-            {props.children}
+            {children}
         </HTag>
     );
 }
 
-export function BootstrapAlertLink(props) {
+export function BootstrapAlertLink({
+    className = null,
+    children,
+    ...props
+
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "alert-link")
+        className: combineClassNames(className, "alert-link")
     };
 
     return (
         <Link {...newProps}>
-            {props.children}
+            {children}
         </Link>
     );
 }

@@ -1,89 +1,107 @@
 import React from "react";
 import { combineClassNames } from "src/lib/Misc";
 
-export default function BootstrapCard(props) {
+export default function BootstrapCard({
+    className = null,
+    children,
+    ...props
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card")
+        className: combineClassNames(className, "card")
     };
 
     return (
         <div {...newProps}>
-            {props.children}
+            {children}
         </div>
     );
 }
 
-export function BootstrapCardBody(props) {
+export function BootstrapCardBody({
+    className = null,
+    children,
+    ...props
+
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-body")
+        className: combineClassNames(className, "card-body")
     };
 
     return (
         <div {...newProps}>
-            {props.children}
+            {children}
         </div>
     );
 }
 
-export function BootstrapCardTitle(props) {
+export function BootstrapCardTitle({
+    className = null,
+    hLevel = 5,
+    children,
+    ...props
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-title")
+        className: combineClassNames(className, "card-title")
     };
-
-    // Delete props will be handled by us, not passed to the <h> tag
-    delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${props.hLevel || 5}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${hLevel}`; //eslint-disable-line no-unused-vars
     return (
         <HTag {...newProps}>
-            {props.children}
+            {children}
         </HTag>
     );
 }
 
-export function BootstapCardSubtitle(props) {
+export function BootstapCardSubtitle({
+    className = null,
+    hLevel = 6,
+    children,
+    ...props
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-subtitle"),
+        className: combineClassNames(className, "card-subtitle"),
     };
 
-    // Delete props will be handled by us, not passed to the <h> tag
-    delete newProps.hLevel;
-
     // For some reason, eslint doesn't recognize that HTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${props.hLevel || 6}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${hLevel}`; //eslint-disable-line no-unused-vars
     return (
         <HTag {...newProps}>
-            {props.children}
+            {children}
         </HTag>
     );
 }
 
-export function BootstrapCardText(props) {
+export function BootstrapCardText({
+    className = null,
+    children,
+    ...props
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-text")
+        className: combineClassNames(className, "card-text")
     };
 
     return (
         <p {...newProps}>
-            {props.children}
+            {children}
         </p>
     );
 }
 
-export function BootstrapCardImage(props) {
+export function BootstrapCardImage({
+    className = null,
+    position = "top",
+    ...props
+}) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-img-" + props.position),
+        className: combineClassNames(className, "card-img-" + position),
     };
-
-    // Delete props will be handled by us, not passed to the <img> tag
-    delete newProps.position;
 
     // alt text will likely be provided in the props, so I'm dismissing the eslint warning
     return (

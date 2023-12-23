@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function HomePage() {
-    document.title = "Home | Cocktail Bar";
+    document.title = "Home | Bingo App";
     
     return (
         <div className="HomePage container">

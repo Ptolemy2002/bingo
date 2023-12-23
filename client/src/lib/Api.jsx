@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isNullOrUndefined } from "./Misc";
 
 export function useApi(path, sort=false, sortFunc=null) {
     const [data, setData] = useState(null);
@@ -11,13 +12,19 @@ export function useApi(path, sort=false, sortFunc=null) {
         root = process.env.REACT_APP_API_URL;
     }
 
-    function sendRequest(args={}) {
+    function sendRequest({
+        onSuccess: _onSuccess = null,
+        onFailure: _onFailure = null,
+        onCompletion: _onCompletion = null,
+        method = "GET",
+        queryParams = null,
+        body = null,
+    }) {
         setData(null);
         setCompleted(false);
         setFailed(false);
         setError(null);
         
-        const _onSuccess = args.onSuccess || null;
         function onSuccess(data) {
             if (sort && Array.isArray(data)) {
                 data.sort((a, b) => {
@@ -34,7 +41,6 @@ export function useApi(path, sort=false, sortFunc=null) {
             if (_onSuccess) _onSuccess(data);
         }
 
-        const _onFailure = args.onFailure || null;
         function onFailure(err) {
             console.error(err);
             setData(null);
@@ -44,25 +50,20 @@ export function useApi(path, sort=false, sortFunc=null) {
             if (_onFailure) _onFailure(err);
         }
 
-        const _onCompletion = args.onCompletion || null;
         function onCompletion() {
             if (_onCompletion) onCompletion(data, failed, error);
         }
 
-        const options = {};
-
-        const method = args.method || "GET";
-        options.method = method;
-        const queryParams = args.queryParams || null;
+        const options = {method, queryParams};
 
         if (method !== "GET") {
             const body = (
-                args.body === null || args.body === undefined ?
+                isNullOrUndefined(body) ?
                     null:
-                typeof args.body !== "string" ?
-                    JSON.stringify(args.body): 
+                typeof body !== "string" ?
+                    JSON.stringify(body): 
                 //else
-                    args.body
+                    body
             );
 
             if (body) {

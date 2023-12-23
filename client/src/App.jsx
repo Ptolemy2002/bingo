@@ -24,7 +24,9 @@ export default function App() {
     );
 }
 
-function Header(props) {
+function Header({
+    title
+}) {
     const currentPath = useCurrentPath();
 
     const navItems = routes.map((route) => {
@@ -43,7 +45,7 @@ function Header(props) {
     return (
         <header>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <Link key="brand" to="#" className="navbar-brand">{props.title}</Link>
+                <Link key="brand" to="#" className="navbar-brand">{title}</Link>
                 <button 
                     className="navbar-toggler"
                     type="button"
@@ -66,15 +68,19 @@ function Header(props) {
     );
 }
 
-function NavItem(props) {
+function NavItem({
+    path,
+    text,
+    active
+}) {
     let className = "nav-link";
-    if (props.active) {
+    if (active) {
         className += " active";
     }
 
     return (
         <li className="nav-item">
-            <Link to={props.path} className={className}>{props.text}</Link>
+            <Link to={path} className={className}>{text}</Link>
         </li>
     );
 }
