@@ -86,7 +86,7 @@ export default function QueryWrapper() {
     );
 }
 
-function SpaceGalleryPage({
+export function SpaceGalleryPage({
     query = "",
     category = "general",
     matchWhole = true,
