@@ -2,7 +2,7 @@ import { combineClassNames } from "src/lib/Misc";
 
 export default function BootstrapButton({
     onClick,
-    variant = "primary",
+    type = "primary",
     className = null,
     disabled = false,
     outline = false,
@@ -14,7 +14,7 @@ export default function BootstrapButton({
         className: combineClassNames(
             className,
             "btn",
-            outline ? `btn-outline-${variant}` : `btn-${variant}`
+            outline ? `btn-outline-${type}` : `btn-${type}`
         ),
         type: "button",
         disabled,

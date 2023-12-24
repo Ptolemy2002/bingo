@@ -101,7 +101,7 @@ registerGettersAndDeleters(router, "/:key-equals/:value", (req) => {
     const key = convertKey(req.params.key);
 
     let value = req.params.value;
-    if (mongo.keyType(SpaceModel, key) === String) {
+    if (mongo.keyType(SpaceModel, key) === "String") {
         value = escapeRegex(value);
     }
 
@@ -115,7 +115,7 @@ registerGettersAndDeleters(router, "/:key-contains/:value", (req) => {
     const key = convertKey(req.params.key);
 
     let value = req.params.value;
-    if (mongo.keyType(SpaceModel, key) === String) {
+    if (mongo.keyType(SpaceModel, key) === "String") {
         value = escapeRegex(value);
     }
 

@@ -82,7 +82,7 @@ export function EditField({
         <div className="btns-hor">
             {
                 !staticCustom ? (
-                    <BootstrapButton variant="secondary" ouline={true} onClick={() => setCustom(!custom)}>
+                    <BootstrapButton type="secondary" ouline={true} onClick={() => setCustom(!custom)}>
                         {custom ? existingMessage : customMessage}
                     </BootstrapButton>
                 ) : null
@@ -91,7 +91,7 @@ export function EditField({
             {
                 custom ? null : (
                     <BootstrapButton
-                        variant="secondary"
+                        type="secondary"
                         outline={true}
                         onClick={refreshHandler}
                         disabled={listStatus.inProgress}
@@ -109,7 +109,7 @@ export function EditField({
             {
                 manualSave ? (
                     <BootstrapButton
-                        variant="secondary"
+                        type="secondary"
                         outline={true} 
                         onClick={() => {if (setValueHandler) setValueHandler(value)}}
                     >
@@ -310,7 +310,7 @@ export function FieldList({
         const {label} = typeMap[type];
 
         return (
-            <BootstrapButton key={"add-button-" + type} variant="secondary" outline={true} onClick={() => add(type, "")}>
+            <BootstrapButton key={"add-button-" + type} type="secondary" outline={true} onClick={() => add(type, "")}>
                 Add "{label}"
             </BootstrapButton>
         );

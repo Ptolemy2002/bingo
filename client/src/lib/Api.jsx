@@ -3,6 +3,7 @@ import { isNullOrUndefined } from "./Misc";
 
 export function useApi(path, sort=false, sortFunc=null) {
     const [data, setData] = useState(null);
+    const [started, setStarted] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [failed, setFailed] = useState(false);
     const [error, setError] = useState(null);
@@ -21,6 +22,7 @@ export function useApi(path, sort=false, sortFunc=null) {
         _body = null,
     }) {
         setData(null);
+        setStarted(true);
         setCompleted(false);
         setFailed(false);
         setError(null);
@@ -38,6 +40,7 @@ export function useApi(path, sort=false, sortFunc=null) {
 
             setData(data);
             setCompleted(true);
+            setStarted(false);
             if (_onSuccess) _onSuccess(data);
         }
 
@@ -47,6 +50,7 @@ export function useApi(path, sort=false, sortFunc=null) {
             setFailed(true);
             setCompleted(true);
             setError(err);
+            setStarted(false);
             if (_onFailure) _onFailure(err);
         }
 
@@ -101,5 +105,5 @@ export function useApi(path, sort=false, sortFunc=null) {
             });
     }
 
-    return [data, {completed, failed, error}, sendRequest];
+    return [data, {started, completed, failed, error}, sendRequest];
 }

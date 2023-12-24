@@ -4,6 +4,7 @@ import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import { Spacer, useMountEffect } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
+import BootstrapButton from "src/lib/Bootstrap/Button";
 
 const searchCategories = [
     {
@@ -74,15 +75,16 @@ export default function QueryWrapper() {
     const category = queryParams.get("category") || "general";
     const matchWhole = queryParams.get("matchWhole") === "true";
 
-    let queryPath = "spaces/all/list-name/distinct";
+    let deletePath = "spaces/all";
+    
     if (query && category) {
         if (category === "general") {
-            queryPath = `spaces/search/${encodeURIComponent(query)}/list-name/distinct`;
+            deletePath = `spaces/search/${encodeURIComponent(query)}`;
         } else {
             if (matchWhole) {
-                queryPath = `spaces/${category}-equals/${encodeURIComponent(query)}/list-name/distinct`;
+                deletePath = `spaces/${category}-equals/${encodeURIComponent(query)}`;
             } else {
-                queryPath = `spaces/${category}-contains/${encodeURIComponent(query)}/list-name/distinct`;
+                deletePath = `spaces/${category}-contains/${encodeURIComponent(query)}`;
             }
         }
     }
@@ -92,7 +94,8 @@ export default function QueryWrapper() {
             query={query}
             category={category}
             matchWhole={matchWhole}
-            queryPath={queryPath}
+            queryPath={deletePath + "/list-name/distinct"}
+            deletePath={deletePath}
         />
     );
 }
@@ -101,7 +104,8 @@ export function SpaceGalleryPage({
     query = "",
     category = "general",
     matchWhole = true,
-    queryPath = "spaces/all/list-name/distinct"
+    queryPath = "spaces/all/list-name/distinct",
+    deletePath = "spaces/all"
 }) {
     if (query && category) {
         document.title = `Space search results for "${query}" | Bingo App`;
@@ -110,6 +114,7 @@ export function SpaceGalleryPage({
     }
 
     const [spaceNames, spaceNamesStatus, sendSpaceNamesRequest] = useApi(queryPath, true, (a, b) => a.localeCompare(b));
+    const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false, null, "DELETE");
 
     function refresh() {
         sendSpaceNamesRequest({
@@ -117,6 +122,12 @@ export function SpaceGalleryPage({
         });
     }
     useMountEffect(refresh);
+
+    function deleteAll(spaceName) {
+        sendDeleteRequest({
+            method: "DELETE",
+        });
+    }
 
     const searchBarElement = (
         <SearchBar
@@ -171,6 +182,21 @@ export function SpaceGalleryPage({
                 {searchBarElement}
                 <Spacer />
 
+                <BootstrapButton
+                    type="danger"
+                    outline={true}
+                    onClick={() => deleteAll()}
+                    disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
+                >
+                    {
+                        deleteStatus.started && !deleteStatus.completed ?
+                            "Deleting...":
+                        deleteStatus.started && deleteStatus.failed ?
+                            "Failed to Delete":
+                        // Else
+                            "Delete"
+                    }
+                </BootstrapButton>
                 <p>
                     TODO
                 </p>

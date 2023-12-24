@@ -32,7 +32,7 @@ function transformQuery(collection, query, args) {
 
         if (key === "_id") {
             verifyValidId(value);
-        } else if (type === String) {
+        } else if (type === "String") {
             query[key] = transformRegex(value, args);
         }
     });

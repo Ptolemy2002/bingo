@@ -123,7 +123,7 @@ export default function SearchBar({
                 </div>
             </div>
 
-            <BootstrapButton variant="primary" className="search-btn" onClick={redirect}>
+            <BootstrapButton type="primary" className="search-btn" onClick={redirect}>
                 <i className="fas fa-search"></i>
             </BootstrapButton>
         </div>
