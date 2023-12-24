@@ -25,7 +25,7 @@ async function listDistinct(collection, field) {
     return result;
 }
 
-function transformQuery(query, args) {
+function transformQuery(collection, query, args) {
     Object.keys(query).forEach((key) => {
         const value = query[key];
         const type = keyType(collection, key);
@@ -36,25 +36,27 @@ function transformQuery(query, args) {
             query[key] = transformRegex(value, args);
         }
     });
+
+    return query;
 }
 
 async function find(collection, query={}, args={}) {
-    return await collection.find(transformQuery(query, args));
+    return await collection.find(transformQuery(collection, query, args));
 }
 
 async function update(collection, query, data, args) {
     // Remove _id from data if present
     if (data._id) delete data._id;
 
-    return await collection.update(transformQuery(query, args), data);
+    return await collection.update(transformQuery(collection, query, args), data);
 }
 
 async function count(collection, query={}, args={}) {
-    return await collection.countDocuments(transformQuery(query, args));
+    return await collection.countDocuments(transformQuery(collection, query, args));
 }
 
 async function del(collection, query={}, args={}) {
-    return await collection.deleteMany(transformQuery(query, args));
+    return await collection.deleteMany(transformQuery(collection, query, args));
 }
 
 async function create(model, data) {

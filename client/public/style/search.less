@@ -1,0 +1,32 @@
+@import "functions";
+@import "variables";
+
+.search-bar {
+    width: 100%;
+
+    .form-outline {
+        .bs-breakpoint-min(md, {
+            width: 90%;
+        });
+
+        .bs-breakpoint-max(sm, {
+            width: 80%;
+        });
+    }
+
+    .search-btn {
+        .bs-breakpoint-min(md, {
+            width: 10%;
+        });
+
+        .bs-breakpoint-max(sm, {
+            width: 20%;
+        });
+    }
+
+    .search-bar-options {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+}

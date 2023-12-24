@@ -1,6 +1,6 @@
 import { combineClassNames } from "src/lib/Misc";
 
-export function BootstrapButton({
+export default function BootstrapButton({
     onClick,
     variant = "primary",
     className = null,

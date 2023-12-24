@@ -32,7 +32,7 @@ export default function BootstrapAlert({
         ...props,
         className: combineClassNames(
             className,
-            "alert", `alert-${props.type}`,
+            "alert", `alert-${type}`,
             allowDismiss ? "alert-dismissible fade show" : null,
             shown ? null : "d-none"
         ),

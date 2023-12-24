@@ -18,7 +18,7 @@ export function useApi(path, sort=false, sortFunc=null) {
         onCompletion: _onCompletion = null,
         method = "GET",
         queryParams = null,
-        body = null,
+        _body = null,
     }) {
         setData(null);
         setCompleted(false);
@@ -58,12 +58,12 @@ export function useApi(path, sort=false, sortFunc=null) {
 
         if (method !== "GET") {
             const body = (
-                isNullOrUndefined(body) ?
+                isNullOrUndefined(_body) ?
                     null:
-                typeof body !== "string" ?
-                    JSON.stringify(body): 
+                typeof _body !== "string" ?
+                    JSON.stringify(_body): 
                 //else
-                    body
+                    _body
             );
 
             if (body) {

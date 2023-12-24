@@ -66,3 +66,7 @@ export function useForceRerender() {
 
     return update;
 }
+
+export function Spacer({ height = "1rem" }) {
+    return <div className="spacer" style={{ height }} />;
+}
