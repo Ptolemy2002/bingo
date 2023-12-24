@@ -1,4 +1,5 @@
-import { arraysEqual, useMountEffect } from "./Misc";
+import { useMountEffect } from "src/lib/Misc";
+import { listsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
 
@@ -85,9 +86,9 @@ export class BingoSpaceData {
         if (spaceState.hasOwnProperty("_id") && spaceState._id !== this.id) return false;
         if (spaceState.hasOwnProperty("name") && spaceState.name !== this.name) return false;
         if (spaceState.hasOwnProperty("description") && spaceState.description !== this.description) return false;
-        if (spaceState.hasOwnProperty("examples") && !arraysEqual(spaceState.examples, this.examples)) return false;
-        if (spaceState.hasOwnProperty("aliases") && !arraysEqual(spaceState.aliases, this.aliases)) return false;
-        if (spaceState.hasOwnProperty("tags") && !arraysEqual(spaceState.tags, this.tags)) return false;
+        if (spaceState.hasOwnProperty("examples") && !listsEqual(spaceState.examples, this.examples)) return false;
+        if (spaceState.hasOwnProperty("aliases") && !listsEqual(spaceState.aliases, this.aliases)) return false;
+        if (spaceState.hasOwnProperty("tags") && !listsEqual(spaceState.tags, this.tags)) return false;
 
         return true;
     }
@@ -381,10 +382,10 @@ export function useBingoSpace(value, primaryKey="name") {
     return spaceData;
 }
 
-export const BingoSpaceContext = React.createContext(undefined);
+export const BingoSpaceContext = createContext(undefined);
 
 export function useBingoSpaceContext() {
-    const context = React.useContext(BingoSpaceContext);
+    const context = useContext(BingoSpaceContext);
     if (context === undefined) {
         throw new Error("No BingoSpaceContext provider found.");
     }

@@ -9,6 +9,17 @@ const searchCategories = [
     {
         value: "general",
         text: "General Search",
+        infoElement: (
+            <BootstrapAlert type="info" allowDismiss={true}>
+                <BootstrapAlert.Heading>
+                    Match Whole Not Supported
+                </BootstrapAlert.Heading>
+                <p>
+                    General Search uses a special algorithm that does not support the match whole option. Also,
+                    the search results will be sorted by relevance instead of alphabetically.
+                </p>
+            </BootstrapAlert>
+        ),
         onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
             // Require exact match for general search
             setMatchWhole(true);
@@ -59,8 +70,8 @@ const searchCategories = [
 
 export default function QueryWrapper() {
     const queryParams = useQuery();
-    const query = queryParams.get("query");
-    const category = queryParams.get("category");
+    const query = queryParams.get("query") || "";
+    const category = queryParams.get("category") || "general";
     const matchWhole = queryParams.get("matchWhole") === "true";
 
     let queryPath = "spaces/all/list-name/distinct";

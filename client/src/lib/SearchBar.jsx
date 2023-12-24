@@ -17,6 +17,8 @@ export default function SearchBar({
     const [staticCategory, setStaticCategory] = useState(initialStaticCategory);
     const [staticMatchWhole, setStaticMatchWhole] = useState(initialStaticMatchWhole);
 
+    const [infoElement, setInfoElement] = useState(null);
+
     function onQueryChange(e) {
         setQuery(e.target.value);
     }
@@ -24,7 +26,7 @@ export default function SearchBar({
     function onCategoryChange(e) {
         setCategory(e.target.value);
         categories.forEach(c => {
-            if (c.name === e.target.value) {
+            if (c.value === e.target.value) {
                 if (c.onSelected) {
                     c.onSelected({
                         query,
@@ -39,7 +41,13 @@ export default function SearchBar({
                         setStaticMatchWhole
                     });
                 }
-            }
+
+                if (c.infoElement) {
+                    setInfoElement(c.infoElement);
+                } else {
+                    setInfoElement(null);
+                }
+            }   
         });
     }
 
@@ -73,6 +81,7 @@ export default function SearchBar({
 
     return (
         <div className="search-bar input-group">
+            {infoElement}
             <div className="form-outline">
                 <input 
                     type="search"

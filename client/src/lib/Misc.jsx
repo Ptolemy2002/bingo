@@ -35,23 +35,12 @@ export function useMountEffect(callback) {
 }
 
 export function combineClassNames(...classNames) {
-    return classNames.filter(c => c).join(' ');
-}
+    classNames = classNames.filter(c => c);
 
-export function arraysEqual(a, b) {
-    if (a === b) return true;
-    if (!a || !b) return false;
-    if (a.length !== b.length) return false;
+    const individualClassNames = classNames.map(c => c.split(' ')).flat();
+    const uniqueClassNames = [...new Set(individualClassNames)];
 
-    for (let i = 0; i < a.length; ++i) {
-        if (Array.isArray(a[i]) && Array.isArray(b[i])) {
-            if (!arraysEqual(a[i], b[i])) return false;
-        } else if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-
-    return true;
+    return uniqueClassNames.join(' ');
 }
 
 export function isNullOrUndefined(v) {
@@ -70,3 +59,4 @@ export function useForceRerender() {
 export function Spacer({ height = "1rem" }) {
     return <div className="spacer" style={{ height }} />;
 }
+

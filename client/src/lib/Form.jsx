@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import { isNullOrUndefined } from "src/lib/Misc";
-import { nanoid } from "nanoid";
+import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
 import { useForceRerender } from "src/lib/Misc";
-import { BootstrapButton } from "./Bootstrap/Button";
+import  BootstrapButton from "src/lib/Bootstrap/Button";
+import { nanoid } from "nanoid";
 
 export function EditField({
     name,
@@ -37,7 +38,7 @@ export function EditField({
     inProgressMessage = "Loading...",
     failedMessage = "Failed.",
 
-    manualSave = false,
+    manualSave = false
 }) {
     const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
@@ -162,12 +163,16 @@ export function EditField({
 export function CustomStringField({
     name,
     label,
+
     value: initValue = "",
     setValue: setValueHandler,
     defaultValue = "",
+
     placeholder = "Enter a value",
+
     validate: _validate,
-    manualSave = false,
+
+    manualSave = false
 }) {
     return (
         <EditField
@@ -188,15 +193,19 @@ export function CustomStringField({
 export function CustomNumberField({
     name,
     label,
+
     value: initValue = "",
     setValue: setValueHandler,
     defaultValue = "",
+
     placeholder = "Enter a value",
+
     integer = false,
     min = null,
     max = null,
     validate: _validate,
-    manualSave = false,
+
+    manualSave = false
 }) {
     return (
         <EditField
@@ -225,6 +234,7 @@ export function FieldList({
     typeMap = {},
 }) {
     const listRef = useRef(initList);
+    const keysListRef = useRef(initList.map(() => nanoid()));
     const typeListRef = useRef(initTypeList);
 
     const forceRerender = useForceRerender();
@@ -232,21 +242,14 @@ export function FieldList({
     const types = Object.keys(typeMap);
 
     function set(index, value) {
-        const newList = [...listRef.current];
-        newList[index] = value;
-        listRef.current = newList;
+        listRef.current = listSet(listRef.current, index, value);
         if (setListHandler) setListHandler(listRef.current);
     }
 
     function remove(index) {
-        const newList = [...listRef.current];
-        const newTypeList = [...typeListRef.current];
-
-        newList.splice(index, 1);
-        newTypeList.splice(index, 1);
-
-        listRef.current = newList;
-        typeListRef.current = newTypeList;
+        listRef.current = listRemove(listRef.current, index);
+        typeListRef.current = listRemove(typeListRef.current, index);
+        keysListRef.current = listRemove(keysListRef.current, index);
 
         if (setListHandler) setListHandler(listRef.current);
         forceRerender();
@@ -255,19 +258,9 @@ export function FieldList({
     function moveUp(index) {
         if (index === 0) return;
 
-        const newList = [...listRef.current];
-        const newTypeList = [...typeListRef.current];
-
-        const temp = newList[index];
-        newList[index] = newList[index - 1];
-        newList[index - 1] = temp;
-
-        const temp2 = newTypeList[index];
-        newTypeList[index] = newTypeList[index - 1];
-        newTypeList[index - 1] = temp2;
-
-        listRef.current = newList;
-        typeListRef.current = newTypeList;
+        listRef.current = listSwap(listRef.current, index, index - 1);
+        typeListRef.current = listSwap(typeListRef.current, index, index - 1);
+        keysListRef.current = listSwap(keysListRef.current, index, index - 1);
 
         if (setListHandler) setListHandler(listRef.current);
         forceRerender();
@@ -276,33 +269,18 @@ export function FieldList({
     function moveDown(index) {
         if (index === listRef.current.length - 1) return;
 
-        const newList = [...listRef.current];
-        const newTypeList = [...typeListRef.current];
-
-        const temp = newList[index];
-        newList[index] = newList[index + 1];
-        newList[index + 1] = temp;
-
-        const temp2 = newTypeList[index];
-        newTypeList[index] = newTypeList[index + 1];
-        newTypeList[index + 1] = temp2;
-
-        listRef.current = newList;
-        typeListRef.current = newTypeList;
+        listRef.current = listSwap(listRef.current, index, index + 1);
+        typeListRef.current = listSwap(typeListRef.current, index, index + 1);
+        keysListRef.current = listSwap(keysListRef.current, index, index + 1);
 
         if (setListHandler) setListHandler(listRef.current);
         forceRerender();
     }
 
     function add(type, value) {
-        const newList = [...listRef.current];
-        const newTypeList = [...typeListRef.current];
-
-        newList.push(value);
-        newTypeList.push(type);
-
-        listRef.current = newList;
-        typeListRef.current = newTypeList;
+        listRef.current = listPush(listRef.current, value);
+        typeListRef.current = listPush(typeListRef.current, type);
+        keysListRef.current = listPush(keysListRef.current, nanoid());
 
         if (setListHandler) setListHandler(listRef.current);
         forceRerender();
@@ -311,16 +289,15 @@ export function FieldList({
     const elements = listRef.current.map((value, i) => {
         const type = typeListRef.current[i];
         const {elementFn} = typeMap[type];
+        const key = keysListRef.current[i];
 
         return (
-            <div key={"field-list-" + nanoid()} className="edit-container mb-1">
+            <div key={"field-list-" + key} className="edit-container mb-1">
                 {elementFn({
                     value: value,
                     setValue: (v) => set(i, v),
                     remove: () => remove(i),
-                    moveUp: () => {
-                        moveUp(i)
-                    },
+                    moveUp: () => moveUp(i),
                     moveDown: () => moveDown(i),
                     isFirstChild: i === 0,
                     isLastChild: i === listRef.current.length - 1
@@ -333,7 +310,7 @@ export function FieldList({
         const {label} = typeMap[type];
 
         return (
-            <BootstrapButton key={"add-button-" + nanoid()} variant="secondary" outline={true} onClick={() => add(type, "")}>
+            <BootstrapButton key={"add-button-" + type} variant="secondary" outline={true} onClick={() => add(type, "")}>
                 Add "{label}"
             </BootstrapButton>
         );
