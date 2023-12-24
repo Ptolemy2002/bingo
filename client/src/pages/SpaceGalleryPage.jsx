@@ -126,6 +126,9 @@ export function SpaceGalleryPage({
     function deleteAll(spaceName) {
         sendDeleteRequest({
             method: "DELETE",
+            onSuccess: () => {
+                refresh();
+            }
         });
     }
 
