@@ -159,6 +159,65 @@ export function EditField({
     }
 }
 
+export function CustomStringField({
+    name,
+    label,
+    value: initValue = "",
+    setValue: setValueHandler,
+    defaultValue = "",
+    placeholder = "Enter a value",
+    validate: _validate,
+    manualSave = false,
+}) {
+    return (
+        <EditField
+            name={name}
+            label={label}
+            value={initValue}
+            setValue={setValueHandler}
+            defaultValue={defaultValue}
+            custom={true}
+            staticCustom={true}
+            placeholder={placeholder}
+            validate={_validate}
+            manualSave={manualSave}
+        />
+    );
+}
+
+export function CustomNumberField({
+    name,
+    label,
+    value: initValue = "",
+    setValue: setValueHandler,
+    defaultValue = "",
+    placeholder = "Enter a value",
+    integer = false,
+    min = null,
+    max = null,
+    validate: _validate,
+    manualSave = false,
+}) {
+    return (
+        <EditField
+            name={name}
+            label={label}
+            value={initValue}
+            setValue={setValueHandler}
+            defaultValue={defaultValue}
+            custom={true}
+            staticCustom={true}
+            placeholder={placeholder}
+            number={true}
+            integer={integer}
+            min={min}
+            max={max}
+            validate={_validate}
+            manualSave={manualSave}
+        />
+    );
+}
+
 export function FieldList({
     list: initList = [],
     setList: setListHandler,

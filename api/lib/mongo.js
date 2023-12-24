@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { tryFn } = require('lib/misc');
+const { transformRegex } = require('lib/regex');
 
 require("models/Space");
 const Space = mongoose.model('spaces');
@@ -24,25 +25,36 @@ async function listDistinct(collection, field) {
     return result;
 }
 
-async function find(collection, query={}) {
-    // Verify that each id is a valid ObjectId
+function transformQuery(query, args) {
     Object.keys(query).forEach((key) => {
-        if (key === "_id") verifyValidId(query[key]);
+        const value = query[key];
+        const type = keyType(collection, key);
+
+        if (key === "_id") {
+            verifyValidId(value);
+        } else if (type === String) {
+            query[key] = transformRegex(value, args);
+        }
     });
-    
-    return await collection.find(query);
 }
 
-async function update(collection, query, data) {
-    // Verify that each id is a valid ObjectId
-    Object.keys(query).forEach((key) => {
-        if (key === "_id") verifyValidId(query[key]);
-    });
+async function find(collection, query={}, args={}) {
+    return await collection.find(transformQuery(query, args));
+}
 
+async function update(collection, query, data, args) {
     // Remove _id from data if present
     if (data._id) delete data._id;
 
-    return await collection.update(query, data);
+    return await collection.update(transformQuery(query, args), data);
+}
+
+async function count(collection, query={}, args={}) {
+    return await collection.countDocuments(transformQuery(query, args));
+}
+
+async function del(collection, query={}, args={}) {
+    return await collection.deleteMany(transformQuery(query, args));
 }
 
 async function create(model, data) {
@@ -56,8 +68,11 @@ module.exports = {
 
     keyType,
     verifyValidId,
+    transformQuery,
     listDistinct: tryFn(listDistinct),
     find: tryFn(find),
+    count: tryFn(count),
     update: tryFn(update),
+    delete: tryFn(del),
     create: tryFn(create)
 };
