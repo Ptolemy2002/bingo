@@ -136,7 +136,17 @@ async function updateSpace(query, data) {
     return await mongo.update(SpaceModel, query, data, {});
 }
 
+async function makeUniqueName(name) {
+    const existingNames = await mongo.listDistinct(SpaceModel, "name");
+    let newName = name;
+    while (existingNames.includes(newName)) {
+        newName += " (Copy)";
+    }
+    return newName;
+}
+
 router.post("/new", async (req, res) => {
+    req.body.name = await makeUniqueName(req.body.name);
     const result = await newSpace(req.body);
     sendResponse(res, result);
 });
@@ -162,18 +172,8 @@ router.put("/update/by-id/:id", async (req, res) => {
 });
 
 async function duplicate(body, findOriginal) {
-    const existingNames = await mongo.listDistinct(SpaceModel, "name");
     const original = await findOriginal(body)[0];
-
-    let newName;
-    if (body.name) {
-        newName = body.name;
-    } else {
-        newName = original.name;
-    }
-    while (existingNames.includes(newName)) {
-        newName += " (Copy)";
-    }
+    let newName = await makeUniqueName(body.name || original.name);
 
     const newDoc = {
         ...original._doc,
