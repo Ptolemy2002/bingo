@@ -123,7 +123,7 @@ export function SpaceGalleryPage({
     }
     useMountEffect(refresh);
 
-    function deleteAll(spaceName) {
+    function deleteAll() {
         sendDeleteRequest({
             method: "DELETE",
             onSuccess: () => {
