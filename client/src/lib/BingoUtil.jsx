@@ -359,9 +359,9 @@ export class BingoSpaceData {
 
 export function useBingoSpace(value, primaryKey="name") {
     const _push = useApi(`spaces/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _pull = useApi(`spaces/get/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _duplicate = null; // TODO
-    const _delete = null; // TODO
+    const _pull = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _duplicate = useApi(`spaces/new`)[2];
+    const _delete = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2]; // Same as pull, but the DELETE method has different behavior
 
     const [spaceData] = useState(
         primaryKey === "id" ? (
