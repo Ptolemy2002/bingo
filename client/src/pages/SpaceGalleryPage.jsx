@@ -5,7 +5,7 @@ import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
 import BootstrapButton, { BootstrapButtonLink } from "src/lib/Bootstrap/Button";
-import { useBingoSpaceData } from "src/lib/BingoUtil";
+import { BingoSpaceData, useBingoSpaceData } from "src/lib/BingoUtil";
 import BootstrapCard from "src/lib/Bootstrap/Card";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import BootstrapModal from "src/lib/Bootstrap/Modal";
@@ -137,7 +137,8 @@ export function SpaceGalleryPage({
 
         return a.localeCompare(b);
     });
-    const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false, null, "DELETE");
+    const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false);
+    const [, newSpaceStatus, sendNewSpaceRequest] = useApi("spaces/new", false);
 
     function refresh() {
         sendSpaceNamesRequest({
@@ -150,6 +151,16 @@ export function SpaceGalleryPage({
         sendDeleteRequest({
             method: "DELETE",
             onSuccess: window.location.reload.bind(window.location)
+        });
+    }
+
+    function createNewSpace() {
+        sendNewSpaceRequest({
+            method: "POST",
+            body: BingoSpaceData.createFromJSON({name: "New Space"}),
+            onSuccess: (data) => {
+                window.location.href = `/space/${data.name}`;
+            }
         });
     }
 
@@ -243,6 +254,22 @@ export function SpaceGalleryPage({
                                 "Delete"
                         }
                     </BootstrapModal.ActivateButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        onClick={createNewSpace}
+                        disabled={newSpaceStatus.started && !newSpaceStatus.completed}
+                    >
+                        {
+                            newSpaceStatus.started && !newSpaceStatus.completed ?
+                                "Creating...":
+                            newSpaceStatus.started && newSpaceStatus.failed ?
+                                "Failed to Create":
+                            // Else
+                                "Create New Space"
+                        }
+                    </BootstrapButton>
                 </div>
                 
                 <div className="card-container">
