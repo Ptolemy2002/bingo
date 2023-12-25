@@ -1,5 +1,5 @@
 import { combineClassNames } from "src/lib/Misc";
-import BootstrapButton from "./Button";
+import BootstrapButton from "src/lib/Bootstrap/Button";
 
 export default function BootstrapModal({
     id,
