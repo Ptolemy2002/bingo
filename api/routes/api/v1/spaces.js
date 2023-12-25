@@ -119,7 +119,7 @@ registerGettersAndDeleters(router, "/:key-contains/:value", (req) => {
         value = escapeRegex(value);
     }
 
-    return { [key]: { $regex: value } };
+    return { [key]: value };
 }, {
     accentInsensitive: true,
     caseInsensitive: true,

@@ -1,10 +1,14 @@
 import React from "react";
 import { useApi } from "src/lib/Api";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { Spacer, useMountEffect } from "src/lib/Misc";
+import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
 import BootstrapButton from "src/lib/Bootstrap/Button";
+import { useBingoSpace } from "src/lib/BingoUtil";
+import BootstrapCard from "src/lib/Bootstrap/Card";
+import BootstrapBadge from "src/lib/Bootstrap/Badge";
+import BootstrapModal from "src/lib/Bootstrap/Modal";
 
 const searchCategories = [
     {
@@ -126,9 +130,7 @@ export function SpaceGalleryPage({
     function deleteAll() {
         sendDeleteRequest({
             method: "DELETE",
-            onSuccess: () => {
-                refresh();
-            }
+            onSuccess: window.location.reload.bind(window.location)
         });
     }
 
@@ -179,31 +181,166 @@ export function SpaceGalleryPage({
             </div>
         );
     } else {
+        const spaceCards = spaceNames.map((name, i) => {
+            if (name.type === "search-result") name = name.value;
+            return (
+                <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
+                    <SpaceCard key={name}
+                        name={name}
+                    />
+                </div>
+            );
+        });
+
         return (
             <div className="SpaceGalleryPage container">
                 <h2>Space Gallery</h2>
                 {searchBarElement}
                 <Spacer />
+                
+                <p>{spaceNames.length} result(s)</p>
+                <div className="btns-hor mb-3">
+                    <BootstrapButton
+                        type="primary"
+                        outline={true}
+                        onClick={refresh}
+                        disabled={spaceNamesStatus.started && !spaceNamesStatus.completed}
+                    >
+                        Refresh
+                    </BootstrapButton>
 
-                <BootstrapButton
-                    type="danger"
-                    outline={true}
-                    onClick={() => deleteAll()}
-                    disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
-                >
-                    {
-                        deleteStatus.started && !deleteStatus.completed ?
-                            "Deleting...":
-                        deleteStatus.started && deleteStatus.failed ?
-                            "Failed to Delete":
-                        // Else
-                            "Delete"
-                    }
-                </BootstrapButton>
-                <p>
-                    TODO
-                </p>
+                    <BootstrapModal.ActivateButton
+                        modalId="delete-modal"
+                        type="danger"
+                        outline={true}
+                        disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
+                    >
+                        {
+                            deleteStatus.started && !deleteStatus.completed ?
+                                "Deleting...":
+                            deleteStatus.started && deleteStatus.failed ?
+                                "Failed to Delete":
+                            // Else
+                                "Delete"
+                        }
+                    </BootstrapModal.ActivateButton>
+                </div>
+                
+                <div className="card-container">
+                    <div className="row g-3">
+                        {spaceCards}
+                    </div>
+                </div>
+
+                <BootstrapModal id="delete-modal">
+                    <BootstrapModal.Header>
+                        Delete All Spaces
+                    </BootstrapModal.Header>
+                    <BootstrapModal.Body>
+                        <p>
+                            Are you sure you want to delete all spaces shown in the current search results?
+                        </p>
+                    </BootstrapModal.Body>
+                    <BootstrapModal.Footer>
+                        <BootstrapButton
+                            type="danger"
+                            onClick={deleteAll}
+                            disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
+                        >
+                            Do It
+                        </BootstrapButton>
+
+                        <BootstrapButton
+                            type="secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cancel
+                        </BootstrapButton>
+                    </BootstrapModal.Footer>
+                </BootstrapModal>
+
             </div>
+        );
+    }
+}
+
+export function SpaceCard({ name }) {
+    const data = useBingoSpace(name);
+
+    function refresh() {
+        data.pull();
+    }
+
+    if (data.hasInProgressRequest("pull") || !data.hasLastRequest()) {
+        return (
+            <BootstrapCard>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>name</BootstrapCard.Title>
+                    <BootstrapCard.Text>
+                        Retrieving space...
+                    </BootstrapCard.Text>
+                </BootstrapCard.Body>
+            </BootstrapCard>
+        )
+    } else if (data.hasFailedRequest("pull")) {
+        return (
+            <BootstrapCard>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>name</BootstrapCard.Title>
+                    <BootstrapCard.Text>
+                        <span className="text-danger">Failed to retrieve space. Error details logged to console.</span>
+                    </BootstrapCard.Text>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        onClick={refresh}
+                    >
+                        Retry
+                    </BootstrapButton>
+                </BootstrapCard.Body>
+            </BootstrapCard>
+        )
+    } else {
+        const description = data.description || "No description provided.";
+        const aliasesText = data.aliases.length > 0 ? "AKA" + listInPlainEnglish(data.aliases.map((i) => `"${i}"`), {max: data.aliases.length, conjunction: "or"}) : "";
+        const examplesText = data.examples.length > 0 ? listInPlainEnglish(data.examples.map((i) => `"${i}"`), {max: 1}) : "";
+        const tagsElements = data.tags.map((tag, i) => {
+            return (
+                <BootstrapBadge key={"tag-" + tag} type="primary" pill={true} className="me-1">{tag}</BootstrapBadge>
+            );
+        });
+
+        return (
+            <BootstrapCard>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>{data.name}</BootstrapCard.Title>
+                    <BootstrapCard.Subtitle hLevel={6}>{aliasesText}</BootstrapCard.Subtitle>
+                    <BootstrapCard.Text>
+                        {tagsElements}
+                        <Spacer />
+                        <b>Desription:</b> {description} <br />
+                        <b>Examples:</b> {examplesText}
+                    </BootstrapCard.Text>
+
+                    <BootstrapButton
+                        type="primary"
+                        className="mb-2"
+                        outline={true}
+                        href={"/space/" + data.name}
+                    >
+                        View Details
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        onClick={refresh}
+                    >
+                        Refresh
+                    </BootstrapButton>
+                </BootstrapCard.Body>
+            </BootstrapCard>
         );
     }
 }

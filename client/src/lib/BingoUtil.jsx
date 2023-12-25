@@ -181,8 +181,6 @@ export class BingoSpaceData {
         this.previousStates.push(checkpoint);
         this.stateIndex = this.previousStates.length - 1;
 
-        this.ingredients.forEach(ingredient => ingredient.checkpoint());
-
         return this;
     }
 
@@ -398,9 +396,9 @@ function BingoSpaceProviderData({
     children
 }) {
     return (
-        <CocktailDataContext.Provider value={value}>
+        <BingoSpaceContext.Provider value={value}>
             {children}
-        </CocktailDataContext.Provider>
+        </BingoSpaceContext.Provider>
     );
 }
 

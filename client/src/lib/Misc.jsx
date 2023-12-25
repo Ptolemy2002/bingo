@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 
-export function listInPlainEnglish(list, max) {
+export function listInPlainEnglish(list, {max = undefined, conjunction = "and"}) {
+    if (max === undefined) max = list.length;
+    
+
     if (list.length === 0) {
         return '';
     }
@@ -8,7 +11,7 @@ export function listInPlainEnglish(list, max) {
         return list[0];
     }
     if (list.length === 2) {
-        return `${list[0]} and ${list[1]}`;
+        return `${list[0]} ${conjunction} ${list[1]}`;
     }
 
     list = list.map((v, i) => {
@@ -23,10 +26,10 @@ export function listInPlainEnglish(list, max) {
         }
     })
 
-    if (max !== undefined && list.length > max) {
-        return `${list.slice(0, max).join('')}and ${list.length - max} more`;
+    if (list.length > max) {
+        return `${list.slice(0, max).join('')}${conjunction} ${list.length - max} more`;
     } else {
-        return `${list.slice(0, -1).join('')}and ${list[list.length - 1]}`;
+        return `${list.slice(0, -1).join('')}${conjunction} ${list[list.length - 1]}`;
     }
 }
 
@@ -57,6 +60,6 @@ export function useForceRerender() {
 }
 
 export function Spacer({ height = "1rem" }) {
-    return <div className="spacer" style={{ height }} />;
+    return <span className="spacer" style={{ display: "block", marginBottom: height}} />;
 }
 
