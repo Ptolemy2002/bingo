@@ -208,7 +208,9 @@ export function SpaceDetailPage({ name }) {
                             <BootstrapButton
                                 type="secondary"
                                 outline={true}
-                                onClick={() => spaceData.duplicate()}
+                                onClick={() => spaceData.duplicate((data) => {
+                                    window.location.href = `/space/${encodeURIComponent(data.name)}`;
+                                })}
                                 disabled={spaceData.hasInProgressRequest()}
                             >
                                 {
@@ -224,7 +226,9 @@ export function SpaceDetailPage({ name }) {
                             <BootstrapButton
                                 type="danger"
                                 outline={true}
-                                onClick={() => spaceData.delete()}
+                                onClick={() => spaceData.delete(() => {
+                                    window.location.href = "/";
+                                })}
                                 disabled={spaceData.hasInProgressRequest()}
                             >
                                 {
@@ -267,7 +271,7 @@ export function SpaceDetailDisplay() {
 
             <h4>Description</h4>
             <MarkdownRenderer>
-                {data.description}
+                {data.description || "No description provided."}
             </MarkdownRenderer>
 
             <h4>Examples</h4>
@@ -529,7 +533,7 @@ export function TagField({
                 custom={false}
                 staticCustom={false}
                 validate={
-                    (v) => /^(\w|\-)*$/.test(v)
+                    (v) => /^(\w|-)*$/.test(v)
                 }
 
                 list={tagList}

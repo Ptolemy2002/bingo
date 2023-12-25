@@ -205,7 +205,7 @@ router.get("/search/:query/list-:prop/distinct", async (req, res) => {
 });
 
 async function newSpace(data) {
-    return await mongo.create(data);
+    return await mongo.create(SpaceModel, data);
 }
 
 async function updateSpace(query, data) {
