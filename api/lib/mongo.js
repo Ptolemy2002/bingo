@@ -44,6 +44,11 @@ async function find(collection, query={}, args={}) {
     return await collection.find(transformQuery(collection, query, args));
 }
 
+async function findEither(collection, keys=[], query={}, args={}) {
+    const or = keys.map((key) => transformQuery(collection, { [key]: query.key }, args));
+    return await collection.find({ $or: or });
+}
+
 async function update(collection, query, data, args) {
     // Remove _id from data if present
     if (data._id) delete data._id;
@@ -55,14 +60,50 @@ async function count(collection, query={}, args={}) {
     return await collection.countDocuments(transformQuery(collection, query, args));
 }
 
+async function countEither(collection, keys=[], query={}, args={}) {
+    const or = keys.map((key) => transformQuery(collection, { [key]: query.key }, args));
+    return await collection.countDocuments({ $or: or });
+}
+
 async function del(collection, query={}, args={}) {
     return await collection.deleteMany(transformQuery(collection, query, args));
+}
+
+async function delEither(collection, keys=[], query={}, args={}) {
+    const or = keys.map((key) => transformQuery(collection, { [key]: query.key }, args));
+    return await collection.deleteMany({ $or: or });
 }
 
 async function create(model, data) {
     data._id = new mongoose.Types.ObjectId();
     data.isNew = true;
     return await model.create(data);
+}
+
+async function search(collection, index, query) {
+    const includeMap = {};
+    for (let key in collection.schema.paths) {
+        includeMap[key] = 1;
+    }
+
+    return await collection.aggregate([{
+        $search: {
+            index,
+            text: {
+                query,
+                path: {
+                    wildcard: "*"
+                }
+            }
+        }
+    }, {
+        $project: {
+            ...includeMap,
+            _score: {
+                $meta: "searchScore"
+            }
+        }
+    }]);
 }
 
 module.exports = {
@@ -73,8 +114,12 @@ module.exports = {
     transformQuery,
     listDistinct: tryFn(listDistinct),
     find: tryFn(find),
+    findEither: tryFn(findEither),
     count: tryFn(count),
+    countEither: tryFn(countEither),
     update: tryFn(update),
     delete: tryFn(del),
-    create: tryFn(create)
+    deleteEither: tryFn(delEither),
+    create: tryFn(create),
+    search: tryFn(search)
 };

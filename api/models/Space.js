@@ -28,4 +28,14 @@ const SpaceSchema = new Schema({
     ],
 });
 
+// Create the Index
+SpaceSchema.index({
+	name: 'default_spaces',
+	definition: {
+		mappings: {
+			dynamic: true
+		}
+	}
+});
+
 module.exports = mongoose.model('spaces', SpaceSchema);

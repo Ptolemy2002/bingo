@@ -16,7 +16,7 @@ function convertKey(key) {
     }
 }
 
-function extractProps(res, prop, docs, distinct=false) {
+function extractProps(res, prop, docs, distinct=false, includeScore=false) {
     if (docs._isError) return sendResponse(res, docs);
     if (prop === "id") prop = "_id";
 
@@ -25,7 +25,17 @@ function extractProps(res, prop, docs, distinct=false) {
         case "_id":
         case "name":
         case "description": {
-            result = docs.map((doc) => doc[prop]);
+            result = docs.map(doc => {
+				if (includeScore) {
+					return {
+						type: "search-result",
+						_score: doc._score,
+						value: doc[prop]
+					};
+				} else {
+					return doc[prop]
+				}
+			});
             break;
         }
 
@@ -33,7 +43,19 @@ function extractProps(res, prop, docs, distinct=false) {
         case "alias":
         case "tag": {
             prop = convertKey(prop);
-            result = docs.map((doc) => doc[prop].join(","));
+            result = docs.map(doc => {
+                return doc[prop].map(value => {
+                    if (includeScore) {
+                        return {
+                            type: "search-result",
+                            _score: doc._score,
+                            value
+                        };
+                    } else {
+                        return value;
+                    }
+                });
+            });
             break;
         }
 
@@ -42,12 +64,28 @@ function extractProps(res, prop, docs, distinct=false) {
         }
     }
 
-    if (distinct) result = [...new Set(result)];
+    if (distinct) {
+		if (includeScore) {
+			result = result.filter((item, index, self) => {
+				return self.findIndex(i => i.value === item.value) === index;
+			});
+		} else {
+			result = result.filter((item, index, self) => {
+				return self.indexOf(item) === index;
+			});
+		}
+	}
+
+    if (includeScore) {
+		result = result.filter(i => i.value !== undefined);
+	} else {
+		result = result.filter(i => i !== undefined);
+	}
 
     return result;
 }
 
-function registerGettersAndDeleters(router, path, _query, _queryArgs) {
+function registerGettersAndDeleters(router, path, _query, _queryArgs, findFunc=mongo.find, countFunc=mongo.count, deleteFunc=mongo.delete) {
     function query(req) {
         if (!_query) return {};
         else if (typeof _query === "function") return _query(req);
@@ -61,11 +99,11 @@ function registerGettersAndDeleters(router, path, _query, _queryArgs) {
     }
 
     async function find(req) {
-        return await mongo.find(SpaceModel, query(req), queryArgs(req));
+        return await findFunc(SpaceModel, query(req), queryArgs(req));
     }
 
     async function count(req) {
-        return await mongo.count(SpaceModel, query(req), queryArgs(req));
+        return await countFunc(SpaceModel, query(req), queryArgs(req));
     }
 
     router.get(`${path}`, async (req, res) => {
@@ -74,7 +112,7 @@ function registerGettersAndDeleters(router, path, _query, _queryArgs) {
     });
 
     router.delete(`${path}`, async (req, res) => {
-        const result = await mongo.delete(SpaceModel, query(req), queryArgs(req));
+        const result = await deleteFunc(SpaceModel, query(req), queryArgs(req));
         sendResponse(res, result);
     });
 
@@ -97,6 +135,24 @@ function registerGettersAndDeleters(router, path, _query, _queryArgs) {
 }
 
 registerGettersAndDeleters(router, "/all");
+registerGettersAndDeleters(router, "/known-as-equals/:value", (req) => ({ key: req.params.value }), {
+        accentInsensitive: true,
+        caseInsensitive: true,
+        matchWhole: true
+    },
+    (collection, query, args) => mongo.findEither(collection, ["name", "aliases"], query, args),
+    (collection, query, args) => mongo.countEither(collection, ["name", "aliases"], query, args),
+    (collection, query, args) => mongo.deleteEither(collection, ["name", "aliases"], query, args)
+);
+registerGettersAndDeleters(router, "/known-as-contains/:value", (req) => ({ key: req.params.value }), {
+        accentInsensitive: true,
+        caseInsensitive: true,
+        matchWhole: false
+    },
+    (collection, query, args) => mongo.findEither(collection, ["name", "aliases"], query, args),
+    (collection, query, args) => mongo.countEither(collection, ["name", "aliases"], query, args),
+    (collection, query, args) => mongo.deleteEither(collection, ["name", "aliases"], query, args)
+);
 registerGettersAndDeleters(router, "/:key-equals/:value", (req) => {
     const key = convertKey(req.params.key);
 
@@ -127,6 +183,26 @@ registerGettersAndDeleters(router, "/:key-contains/:value", (req) => {
 });
 registerGettersAndDeleters(router, "/by-exact-name/:name", (req) => ({ name: req.params.name }), {});
 registerGettersAndDeleters(router, "/by-exact-id/:id", (req) => ({ _id: req.params.id }), {});
+
+router.get("/search/:query", async (req, res) => {
+    const result = await mongo.search(SpaceModel, "default_spaces", req.params.query);
+    sendResponse(res, result);
+});
+
+router.get("/search/:query/count", async (req, res) => {
+    const result = await mongo.search(SpaceModel, "default_spaces", req.params.query);
+    sendResponse(res, result.length);
+});
+
+router.get("/search/:query/list-:prop", async (req, res) => {
+    const result = await mongo.search(SpaceModel, "default_spaces", req.params.query);
+    sendResponse(res, extractProps(res, req.params.prop, result, false, true));
+});
+
+router.get("/search/:query/list-:prop/distinct", async (req, res) => {
+    const result = await mongo.search(SpaceModel, "default_spaces", req.params.query);
+    sendResponse(res, extractProps(res, req.params.prop, result, true, true));
+});
 
 async function newSpace(data) {
     return await mongo.create(data);

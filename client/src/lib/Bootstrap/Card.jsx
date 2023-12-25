@@ -87,9 +87,9 @@ export function BootstrapCardText({
     };
 
     return (
-        <p {...newProps}>
+        <div {...newProps}>
             {children}
-        </p>
+        </div>
     );
 }
 

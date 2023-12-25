@@ -41,6 +41,14 @@ const searchCategories = [
     },
 
     {
+        value: "known-as",
+        text: "By Name or Alias",
+        onSelected: ({ setStaticMatchWhole }) => {
+            setStaticMatchWhole(false);
+        }
+    },
+
+    {
         value: "description",
         text: "By Description",
         onSelected: ({ setStaticMatchWhole }) => {
@@ -117,7 +125,17 @@ export function SpaceGalleryPage({
         document.title = "Space Gallery | Bingo App";
     }
 
-    const [spaceNames, spaceNamesStatus, sendSpaceNamesRequest] = useApi(queryPath, true, (a, b) => a.localeCompare(b));
+    const [spaceNames, spaceNamesStatus, sendSpaceNamesRequest] = useApi(queryPath, true, (a, b) => {
+        if (a.type === "search-result" && b.type === "search-result") {
+            if (Math.abs(a._score - b._score) > Number.EPSILON) {
+                return b._score - a._score;
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        }
+
+        return a.localeCompare(b);
+    });
     const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false, null, "DELETE");
 
     function refresh() {
@@ -301,7 +319,11 @@ export function SpaceCard({ name }) {
     } else {
         const description = data.description || "No description provided.";
         const aliasesText = data.aliases.length > 0 ? "AKA" + listInPlainEnglish(data.aliases.map((i) => `"${i}"`), {max: data.aliases.length, conjunction: "or"}) : "";
-        const examplesText = data.examples.length > 0 ? listInPlainEnglish(data.examples.map((i) => `"${i}"`), {max: 1}) : "";
+        const examplesElements = data.examples.map((example, i) => {
+            return (
+                <li key={"example-" + i}>{example}</li>
+            );
+        });
         const tagsElements = data.tags.map((tag, i) => {
             return (
                 <BootstrapBadge key={"tag-" + tag} type="primary" pill={true} className="me-1">{tag}</BootstrapBadge>
@@ -317,9 +339,17 @@ export function SpaceCard({ name }) {
                         {tagsElements}
                         <Spacer />
                         <b>Desription:</b> {description} <br />
-                        <b>Examples:</b> {examplesText}
+                        <b>Examples:</b> <br />
+                        <ul>
+                            {
+                                examplesElements.length === 0 ?
+                                    "No examples provided.":
+                                // Else
+                                examplesElements
+                            }
+                        </ul>
                     </BootstrapCard.Text>
-
+                    
                     <BootstrapButton
                         type="primary"
                         className="mb-2"

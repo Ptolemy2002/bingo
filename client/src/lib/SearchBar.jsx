@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import BootstrapButton from "src/lib/Bootstrap/Button";
+import { useMountEffect } from "src/lib/Misc";
 
 export default function SearchBar({
     id = "search-bar",
@@ -50,6 +51,8 @@ export default function SearchBar({
             }   
         });
     }
+    // Initialize category on mount
+    useMountEffect(() => onCategoryChange({ target: { value: category } }));
 
     function onMatchWholeChange(e) {
         setMatchWhole(e.target.checked);

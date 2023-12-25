@@ -89,7 +89,6 @@ export function BootstrapModalFooter({
         )
     };
 
-    console.log(cancelProps);
     return (
         <div {...newProps}>
             {children}
