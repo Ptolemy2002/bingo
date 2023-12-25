@@ -49,9 +49,7 @@ export function BootstrapModalHeader({
             <HTag className="modal-title">
                 {children}
             </HTag>
-            <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
         </div>
     );
 }
@@ -79,6 +77,8 @@ export function BootstrapModalBody({
 export function BootstrapModalFooter({
     children,
     className,
+    cancelProps = {},
+    cancelText = "Cancel",
     ...props
 }) {
     const newProps = {
@@ -89,9 +89,16 @@ export function BootstrapModalFooter({
         )
     };
 
+    console.log(cancelProps);
     return (
         <div {...newProps}>
             {children}
+            <BootstrapButton
+                {...cancelProps}
+                data-bs-dismiss="modal"
+            >
+                {cancelText}
+            </BootstrapButton>
         </div>
     );
 }

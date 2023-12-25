@@ -241,20 +241,17 @@ export function SpaceGalleryPage({
                             Are you sure you want to delete all spaces shown in the current search results?
                         </p>
                     </BootstrapModal.Body>
-                    <BootstrapModal.Footer>
+                    <BootstrapModal.Footer
+                        cancelProps={{
+                            type: "secondary"
+                        }}
+                    >
                         <BootstrapButton
                             type="danger"
                             onClick={deleteAll}
                             disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
                         >
                             Do It
-                        </BootstrapButton>
-
-                        <BootstrapButton
-                            type="secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Cancel
                         </BootstrapButton>
                     </BootstrapModal.Footer>
                 </BootstrapModal>
