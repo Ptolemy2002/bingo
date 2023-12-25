@@ -4,11 +4,12 @@ import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
-import BootstrapButton from "src/lib/Bootstrap/Button";
-import { useBingoSpace } from "src/lib/BingoUtil";
+import BootstrapButton, { BootstrapButtonLink } from "src/lib/Bootstrap/Button";
+import { useBingoSpaceData } from "src/lib/BingoUtil";
 import BootstrapCard from "src/lib/Bootstrap/Card";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import BootstrapModal from "src/lib/Bootstrap/Modal";
+import MarkdownRenderer from "src/lib/Markdown";
 
 const searchCategories = [
     {
@@ -41,6 +42,14 @@ const searchCategories = [
     },
 
     {
+        value: "alias",
+        text: "By Alias",
+        onSelected: ({ setStaticMatchWhole }) => {
+            setStaticMatchWhole(false);
+        }
+    },
+
+    {
         value: "known-as",
         text: "By Name or Alias",
         onSelected: ({ setStaticMatchWhole }) => {
@@ -59,14 +68,6 @@ const searchCategories = [
     {
         value: "example",
         text: "By Example",
-        onSelected: ({ setStaticMatchWhole }) => {
-            setStaticMatchWhole(false);
-        }
-    },
-
-    {
-        value: "alias",
-        text: "By Alias",
         onSelected: ({ setStaticMatchWhole }) => {
             setStaticMatchWhole(false);
         }
@@ -280,7 +281,7 @@ export function SpaceGalleryPage({
 }
 
 export function SpaceCard({ name }) {
-    const data = useBingoSpace(name);
+    const data = useBingoSpaceData(name);
 
     function refresh() {
         data.pull();
@@ -338,7 +339,11 @@ export function SpaceCard({ name }) {
                     <BootstrapCard.Text>
                         {tagsElements}
                         <Spacer />
-                        <b>Desription:</b> {description} <br />
+                        <b>Desription:</b> <br />
+                        <MarkdownRenderer>
+                            {description}
+                        </MarkdownRenderer>
+
                         <b>Examples:</b> <br />
                         <ul>
                             {
@@ -350,14 +355,14 @@ export function SpaceCard({ name }) {
                         </ul>
                     </BootstrapCard.Text>
                     
-                    <BootstrapButton
+                    <BootstrapButtonLink
                         type="primary"
                         className="mb-2"
                         outline={true}
-                        href={"/space/" + data.name}
+                        to={`/space/${data.name}`}
                     >
                         View Details
-                    </BootstrapButton>
+                    </BootstrapButtonLink>
 
                     <BootstrapButton
                         type="secondary"

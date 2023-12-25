@@ -199,6 +199,7 @@ export class BingoSpaceData {
         this.requestError = null;
         this.requestFailed = false;
         this.requestInProgress = true;
+        
         this._push({
             method: "PUT",
             body: this.toJSON(),
@@ -356,7 +357,7 @@ export class BingoSpaceData {
     }
 }
 
-export function useBingoSpace(value, primaryKey="name") {
+export function useBingoSpaceData(value, primaryKey="name") {
     const _push = useApi(`spaces/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _pull = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _duplicate = useApi(`spaces/new`)[2];
@@ -382,7 +383,7 @@ export function useBingoSpace(value, primaryKey="name") {
 
 export const BingoSpaceContext = createContext(undefined);
 
-export function useBingoSpaceContext() {
+export function useBingoSpaceDataContext() {
     const context = useContext(BingoSpaceContext);
     if (context === undefined) {
         throw new Error("No BingoSpaceContext provider found.");
@@ -391,7 +392,7 @@ export function useBingoSpaceContext() {
 }
 
 // These two functions are just utility, so they shouldn't be exported. Use BingoSpaceProvider instead.
-function BingoSpaceProviderData({
+function BingoSpaceDataProviderData({
     value,
     children
 }) {
@@ -402,28 +403,28 @@ function BingoSpaceProviderData({
     );
 }
 
-function BingoSpaceProviderUse({
+function BingoSpaceDataProviderUse({
     value,
     primaryKey = "name",
     children
 }) {
-    const spaceData = useBingoSpace(value, primaryKey);
+    const spaceData = useBingoSpaceData(value, primaryKey);
     return (
-        <BingoSpaceProviderData value={spaceData}>
+        <BingoSpaceDataProviderData value={spaceData}>
             {children}
-        </BingoSpaceProviderData>
+        </BingoSpaceDataProviderData>
     );
 }
 
-export function BingoSpaceProvider({
+export function BingoSpaceDataProvider({
     data,
     value,
     primaryKey = "name",
     children
 }) {
     if (data) {
-        return <BingoSpaceProviderData value={data}>{children}</BingoSpaceProviderData>;
+        return <BingoSpaceDataProviderData value={data}>{children}</BingoSpaceDataProviderData>;
     } else {
-        return <BingoSpaceProviderUse value={value} primaryKey={primaryKey}>{children}</BingoSpaceProviderUse>;
+        return <BingoSpaceDataProviderUse value={value} primaryKey={primaryKey}>{children}</BingoSpaceDataProviderUse>;
     }
 }

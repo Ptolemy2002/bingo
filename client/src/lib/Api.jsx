@@ -19,8 +19,8 @@ export function useApi(path, sort=false, sortFunc=null) {
         onCompletion: _onCompletion = null,
         method = "GET",
         queryParams = null,
-        _body = null,
-    }) {
+        body: _body = null,
+    }={}) {
         setData(null);
         setStarted(true);
         setCompleted(false);
@@ -69,7 +69,7 @@ export function useApi(path, sort=false, sortFunc=null) {
                 //else
                     _body
             );
-
+            
             if (body) {
                 options.body = body;
             }

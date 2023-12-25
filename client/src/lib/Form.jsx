@@ -13,6 +13,7 @@ export function EditField({
     value: initValue = "",
     setValue: setValueHandler,
     defaultValue = "",
+    textArea = false,
 
     custom: initCustom = true,
     staticCustom = true,
@@ -82,7 +83,7 @@ export function EditField({
         <div className="btns-hor">
             {
                 !staticCustom ? (
-                    <BootstrapButton type="secondary" ouline={true} onClick={() => setCustom(!custom)}>
+                    <BootstrapButton type="secondary" outline={true} onClick={() => setCustom(!custom)}>
                         {custom ? existingMessage : customMessage}
                     </BootstrapButton>
                 ) : null
@@ -124,7 +125,20 @@ export function EditField({
         return (
             <div className="form-group mb-2">
                 <label htmlFor={name}><h6>{label}</h6></label>
-                <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={onChange} name={name} />
+                {
+                    textArea ? (
+                        <textarea
+                            placeholder={placeholder}
+                            className="form-control"
+                            value={value}
+                            onChange={onChange}
+                            name={name}
+                        />
+                    ) : (
+                        <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={onChange} name={name} />
+                    )
+                }
+
                 {optionsElement}
             </div>
         );
@@ -141,7 +155,7 @@ export function EditField({
                 </BootstrapAlert>
             );
         } else {
-            const choices = list.current.map((item, i) => {
+            const choices = list.map((item, i) => {
                 return (
                     <option key={"option-" + i} value={item}>{item}</option>
                 );
@@ -167,6 +181,7 @@ export function CustomStringField({
     value: initValue = "",
     setValue: setValueHandler,
     defaultValue = "",
+    textArea = false,
 
     placeholder = "Enter a value",
 
@@ -181,6 +196,7 @@ export function CustomStringField({
             value={initValue}
             setValue={setValueHandler}
             defaultValue={defaultValue}
+            textArea={textArea}
             custom={true}
             staticCustom={true}
             placeholder={placeholder}
@@ -197,6 +213,7 @@ export function CustomNumberField({
     value: initValue = "",
     setValue: setValueHandler,
     defaultValue = "",
+    textArea = false,
 
     placeholder = "Enter a value",
 
@@ -214,6 +231,7 @@ export function CustomNumberField({
             value={initValue}
             setValue={setValueHandler}
             defaultValue={defaultValue}
+            textArea={textArea}
             custom={true}
             staticCustom={true}
             placeholder={placeholder}
@@ -295,6 +313,7 @@ export function FieldList({
             <div key={"field-list-" + key} className="edit-container mb-1">
                 {elementFn({
                     value: value,
+                    index: i,
                     setValue: (v) => set(i, v),
                     remove: () => remove(i),
                     moveUp: () => moveUp(i),

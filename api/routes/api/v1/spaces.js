@@ -55,7 +55,7 @@ function extractProps(res, prop, docs, distinct=false, includeScore=false) {
                         return value;
                     }
                 });
-            });
+            }).flat();
             break;
         }
 
@@ -209,7 +209,9 @@ async function newSpace(data) {
 }
 
 async function updateSpace(query, data) {
-    return await mongo.update(SpaceModel, query, data, {});
+    const result = await mongo.update(SpaceModel, query, data, {});
+    console.log(result, data);
+    return result;
 }
 
 async function makeUniqueName(name) {

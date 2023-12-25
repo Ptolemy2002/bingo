@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { matchRoutes, useLocation } from "react-router-dom";
 import  HomePage from "src/pages/HomePage";
 import SpaceGalleryPage from "src/pages/SpaceGalleryPage";
+import SpaceDetailPage from "src/pages/SpaceDetailPage";
 
 export const routes = [
     {
@@ -14,6 +15,11 @@ export const routes = [
         path: "/space-gallery",
         navigationText: "Space Gallery",
         element: <SpaceGalleryPage />
+    },
+
+    {
+        path: "/space/:name",
+        element: <SpaceDetailPage />
     }
 ];
 
