@@ -16,10 +16,10 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }) {
     const hLevelOverride = {};
 
     for (let i = 1; i <= 6; i++) {
-        if (i + baseHLevel > 6) {
+        if (i + baseHLevel - 1 > 6) {
             hLevelOverride[`h${i}`] = `h6`;
         } else {
-            hLevelOverride[`h${i}`] = `h${i + baseHLevel}`;
+            hLevelOverride[`h${i}`] = `h${i + baseHLevel - 1}`;
         }
     }
 
