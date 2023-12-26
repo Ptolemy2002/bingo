@@ -36,7 +36,8 @@ const searchCategories = [
     {
         value: "name",
         text: "By Name",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     },
@@ -44,7 +45,8 @@ const searchCategories = [
     {
         value: "alias",
         text: "By Alias",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     },
@@ -52,7 +54,8 @@ const searchCategories = [
     {
         value: "known-as",
         text: "By Name or Alias",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     },
@@ -60,7 +63,8 @@ const searchCategories = [
     {
         value: "description",
         text: "By Description",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     },
@@ -68,7 +72,8 @@ const searchCategories = [
     {
         value: "example",
         text: "By Example",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     },
@@ -76,7 +81,8 @@ const searchCategories = [
     {
         value: "tag",
         text: "By Tag",
-        onSelected: ({ setStaticMatchWhole }) => {
+        onSelected: ({ setMatchWhole, setStaticMatchWhole }) => {
+            setMatchWhole(false);
             setStaticMatchWhole(false);
         }
     }
@@ -85,7 +91,7 @@ const searchCategories = [
 export default function QueryWrapper() {
     const queryParams = useQuery();
     const query = queryParams.get("query") || "";
-    const category = queryParams.get("category") || "general";
+    const category = queryParams.get("category") || "known-as";
     const matchWhole = queryParams.get("matchWhole") === "true";
 
     let deletePath = "spaces/all";

@@ -39,7 +39,8 @@ export function EditField({
     inProgressMessage = "Loading...",
     failedMessage = "Failed.",
 
-    manualSave = false
+    manualSave = false,
+    fieldRef = null
 }) {
     const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
@@ -75,6 +76,7 @@ export function EditField({
     }
 
     function onChange(event) {
+        console.log("onChange");
         if (!validate(event.target.value)) return;
         setValue(event.target.value);
     }
@@ -128,6 +130,7 @@ export function EditField({
                 {
                     textArea ? (
                         <textarea
+                            ref={fieldRef}
                             placeholder={placeholder}
                             className="form-control mb-1"
                             value={value}
@@ -135,7 +138,7 @@ export function EditField({
                             name={name}
                         />
                     ) : (
-                        <input type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
+                        <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
                     )
                 }
 
@@ -164,7 +167,7 @@ export function EditField({
             return (
                 <div className="form-group mb-1">
                     <label htmlFor={name}><h6>{label}</h6></label>
-                    <select className="form-control mb-1" value={value} onChange={onChange} name={name}>
+                    <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
                         {choices}
                     </select>
                     {optionsElement}
@@ -187,7 +190,8 @@ export function CustomStringField({
 
     validate: _validate,
 
-    manualSave = false
+    manualSave = false,
+    fieldRef = null
 }) {
     return (
         <EditField
@@ -202,6 +206,7 @@ export function CustomStringField({
             placeholder={placeholder}
             validate={_validate}
             manualSave={manualSave}
+            fieldRef={fieldRef}
         />
     );
 }
@@ -222,7 +227,8 @@ export function CustomNumberField({
     max = null,
     validate: _validate,
 
-    manualSave = false
+    manualSave = false,
+    fieldRef = null
 }) {
     return (
         <EditField
@@ -241,6 +247,7 @@ export function CustomNumberField({
             max={max}
             validate={_validate}
             manualSave={manualSave}
+            fieldRef={fieldRef}
         />
     );
 }

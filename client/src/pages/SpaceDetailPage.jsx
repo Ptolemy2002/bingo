@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BingoSpaceDataProvider, useBingoSpaceData, useBingoSpaceDataContext } from "src/lib/BingoUtil";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import NotFoundPage from "./NotFoundPage";
 import BootstrapButton from "src/lib/Bootstrap/Button";
-import MarkdownRenderer from "src/lib/Markdown";
+import MarkdownRenderer, { MarkdownEditorButtons } from "src/lib/Markdown";
 import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import { CustomStringField, EditField, FieldList } from "src/lib/Form";
@@ -303,6 +303,8 @@ export function SpaceDetailEdit({
 
     const [tagList, tagListStatus, tagListRefresh] = useApi("spaces/all/list-tag/distinct", true);
 
+    const descriptionFieldRef = useRef(null);
+
     useMountEffect(() => {
         tagListRefresh();
     });
@@ -379,7 +381,7 @@ export function SpaceDetailEdit({
             />
 
             <h2>Description</h2>
-            <CustomStringField
+            <CustomStringField fieldRef={descriptionFieldRef}
                 name="description"
                 label="Description (Markdown)"
 
@@ -387,6 +389,11 @@ export function SpaceDetailEdit({
                 setValue={setDescription}
                 placeholder="Enter a description"
                 textArea={true}
+            />
+
+            <MarkdownEditorButtons
+                elementRef={descriptionFieldRef}
+                className="btns-hor mb-3"
             />
 
             {
