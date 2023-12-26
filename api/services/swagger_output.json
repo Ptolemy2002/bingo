@@ -6,7 +6,7 @@
     "description": "Documentation of the Bingo API"
   },
   "host": "localhost:8080",
-  "basePath": "/api/v1",
+  "basePath": "/api/v1/",
   "schemes": [
     "http",
     "https"
@@ -20,10 +20,720 @@
   "paths": {
     "/": {
       "get": {
-        "description": "",
+        "description": "Root route. Use it to check if the API is running.",
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+
+    "/spaces/all": {
+      "get": {
+        "description": "Get all bingo spaces in the database.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete all bingo spaces in the database.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    
+    "/spaces/all/count": {
+      "get": {
+        "description": "Get the number of bingo spaces in the database.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/all/list-{prop}": {
+      "get": {
+        "description": "Get a list of all values for a given property of all bingo spaces in the database.",
+        "parameters": [
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/all/list-{prop}/distinct": {
+      "get": {
+        "description": "Get a list of all distinct values for a given property of all bingo spaces in the database.",
+        "parameters": [
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/{key}-{comparison}/{value}": {
+      "get": {
+        "description": "Get all bingo spaces with the given key matching the given value with the given comparison type (case insensitive, accent insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "The key to search for. Specifying 'known-as' will search for a match either in the name or in the alias.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag",
+              "known-as"
+            ]
+          },
+          {
+            "name": "comparison",
+            "in": "path",
+            "description": "The comparison operator to use.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains"
+            ]
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "description": "The value to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete all bingo spaces with the given key equal to the given value (case insensitive, accent insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "The key to search for. Specifying 'known-as' will search for a match either in the name or in the alias.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag",
+              "known-as"
+            ]
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "description": "The value to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+    
+    "/spaces/{key}-{comparison}/{value}/count": {
+      "get": {
+        "description": "Get the number of bingo spaces with the given key matching the given value with the given comparison type (case insensitive, accent insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "The key to search for. Specifying 'known-as' will search for a match either in the name or in the alias.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag",
+              "known-as"
+            ]
+          },
+          {
+            "name": "comparison",
+            "in": "path",
+            "description": "The comparison operator to use.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains"
+            ]
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "description": "The value to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+    
+    "/spaces/{key}-{comparison}/{value}/list-{prop}": {
+      "get": {
+        "description": "Get a list of all values for a given property of all bingo spaces with the given key matching the given value with the given comparison type (case insensitive, accent insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "The key to search for. Specifying 'known-as' will search for a match either in the name or in the alias.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag",
+              "known-as"
+            ]
+          },
+          {
+            "name": "comparison",
+            "in": "path",
+            "description": "The comparison operator to use.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains"
+            ]
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "description": "The value to search for.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/{key}-{comparison}/{value}/list-{prop}/distinct": {
+      "get": {
+        "description": "Get a list of all distinct values for a given property of all bingo spaces with the given key matching the given value with the given comparison type (case insensitive, accent insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "The key to search for. Specifying 'known-as' will search for a match either in the name or in the alias.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag",
+              "known-as"
+            ]
+          },
+          {
+            "name": "comparison",
+            "in": "path",
+            "description": "The comparison operator to use.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains"
+            ]
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "description": "The value to search for.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/search/{query}": {
+      "get": {
+        "description": "Search for bingo spaces matching the given query using the atlas search index. Each result comes with a score indicating how well the result matches the query.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "The query to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete all bingo spaces matching the given query using the atlas search index.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "The query to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/search/{query}/count": {
+      "get": {
+        "description": "Get the number of bingo spaces matching the given query using the atlas search index.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "The query to search for.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/search/{query}/list-{prop}": {
+      "get": {
+        "description": "Get a list of all values for a given property of all bingo spaces matching the given query using the atlas search index. Each result comes with a score indicating how well the result matches the query.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "The query to search for.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/search/{query}/list-{prop}/distinct": {
+      "get": {
+        "description": "Get a list of all distinct values for a given property of all bingo spaces matching the given query using the atlas search index. Each result comes with a score indicating how well the result matches the query.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "The query to search for.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "description": "The property to get a list of values for.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "id",
+              "name",
+              "description",
+              "example",
+              "alias",
+              "tag"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/new": {
+      "post": {
+        "description": "Create a new bingo space.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The bingo space to create. If the specified name is already taken, it will be modified until it is unique.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created. Response body contains the name of the created bingo space."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/update/by-name/{name}": {
+      "put": {
+        "description": "Update the bingo space with the given name (case sensitive, accent sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the bingo space to update.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The updated bingo space.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/update/by-id/{id}": {
+      "put": {
+        "description": "Update the bingo space with the given id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the bingo space to update.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The updated bingo space.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/duplicate/by-name/{name}": {
+      "post": {
+        "description": "Duplicate the bingo space with the given name (case sensitive, accent sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the bingo space to duplicate.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The data values to replace in the duplicated bingo space.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/duplicate/by-id/{id}": {
+      "post": {
+        "description": "Duplicate the bingo space with the given id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the bingo space to duplicate.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The data values to replace in the duplicated bingo space.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "400": {
+            "description": "Bad request. Response body contains error details."
           }
         }
       }

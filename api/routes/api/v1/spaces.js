@@ -191,8 +191,8 @@ router.get("/search/:query", async (req, res) => {
 
 router.delete("/search/:query", async (req, res) => {
     const docs = await mongo.search(SpaceModel, "default_spaces", req.params.query);
-    docs.forEach(doc => {
-        mongo.delete(SpaceModel, { _id: doc._id });
+    docs.forEach(async doc => {
+        await mongo.delete(SpaceModel, { _id: doc._id });
     });
     sendResponse(res, { deleted: docs.length });
 });
@@ -243,6 +243,7 @@ router.put("/update/by-name/:name", async (req, res) => {
     if (existingNames.includes(req.params.name)) {
         result = await updateSpace({ name: req.params.name }, req.body);
     } else {
+        req.params.name = await makeUniqueName(req.params.name);
         result = await newSpace(req.body);
     }
 
@@ -257,7 +258,7 @@ router.put("/update/by-id/:id", async (req, res) => {
 
 async function duplicate(body, findOriginal) {
     const original = await findOriginal(body)[0];
-    let newName = await makeUniqueName(body.name || original.name);
+    const newName = await makeUniqueName(body.name || original.name);
 
     const newDoc = {
         ...original._doc,
