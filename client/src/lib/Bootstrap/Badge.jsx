@@ -12,7 +12,7 @@ export default function BootstrapBadge({
     children,
     className,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(

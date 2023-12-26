@@ -11,7 +11,7 @@ import { CustomStringField, EditField, FieldList } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
 
-export default function QueryWrapper({editMode: initEditMode=false}) {
+export default function QueryWrapper({editMode: initEditMode=false}={}) {
     const { name } = useParams();
 
     return (
@@ -22,7 +22,7 @@ export default function QueryWrapper({editMode: initEditMode=false}) {
     );
 }
 
-export function SpaceDetailPage({ name, editMode: initEditMode=false }) {
+export function SpaceDetailPage({ name, editMode: initEditMode=false }={}) {
     const spaceData = useBingoSpaceData(name, {
         onPullSuccess: () => {
             setEditMode(initEditMode);
@@ -278,7 +278,7 @@ export function SpaceDetailDisplay() {
             {tagsElements}
 
             <h4>Description</h4>
-            <MarkdownRenderer>
+            <MarkdownRenderer baseHLevel={5}>
                 {data.description || "No description provided."}
             </MarkdownRenderer>
 
@@ -298,7 +298,7 @@ export function SpaceDetailDisplay() {
 export function SpaceDetailEdit({
     exit,
     exitWithoutSaving
-}) {
+}={}) {
     const data = useBingoSpaceDataContext();
 
     const [name, setName] = useState(data.name);
@@ -486,7 +486,7 @@ export function AliasField({
     moveDown,
     isFirstChild,
     isLastChild
-}) {
+}={}) {
     return (
         <div className="alias-field">
             <CustomStringField
@@ -538,7 +538,7 @@ export function ExampleField({
     moveDown,
     isFirstChild,
     isLastChild
-}) {
+}={}) {
     return (
         <div className="example-field">
             <CustomStringField
@@ -594,7 +594,7 @@ export function TagField({
     moveDown,
     isFirstChild,
     isLastChild
-}) {
+}={}) {
     return (
         <div className="tag-field">
             <EditField

@@ -125,7 +125,7 @@ export function SpaceGalleryPage({
     matchWhole = true,
     queryPath = "spaces/all/list-name/distinct",
     deletePath = "spaces/all"
-}) {
+}={}) {
     if (query && category) {
         document.title = `Space search results for "${query}" | Bingo App`;
     } else {
@@ -169,7 +169,7 @@ export function SpaceGalleryPage({
             method: "POST",
             body: BingoSpaceData.createFromJSON({name: "New Space"}),
             onSuccess: (data) => {
-                window.location.href = `/space/${data.name}`;
+                window.location.href = `/space/${data.name}/edit`;
             }
         });
     }
@@ -317,7 +317,7 @@ export function SpaceGalleryPage({
     }
 }
 
-export function SpaceCard({ name }) {
+export function SpaceCard({ name }={}) {
     const data = useBingoSpaceData(name);
 
     function refresh() {

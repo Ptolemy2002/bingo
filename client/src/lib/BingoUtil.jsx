@@ -395,7 +395,7 @@ export function useBingoSpaceDataContext() {
 function BingoSpaceDataProviderData({
     value,
     children
-}) {
+}={}) {
     return (
         <BingoSpaceContext.Provider value={value}>
             {children}
@@ -407,7 +407,7 @@ function BingoSpaceDataProviderUse({
     value,
     primaryKey = "name",
     children
-}) {
+}={}) {
     const spaceData = useBingoSpaceData(value, primaryKey);
     return (
         <BingoSpaceDataProviderData value={spaceData}>
@@ -421,7 +421,7 @@ export function BingoSpaceDataProvider({
     value,
     primaryKey = "name",
     children
-}) {
+}={}) {
     if (data) {
         return <BingoSpaceDataProviderData value={data}>{children}</BingoSpaceDataProviderData>;
     } else {

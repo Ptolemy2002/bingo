@@ -9,7 +9,7 @@ export default function BootstrapAlert({
     className = null,
     children,
     ...props
-}) {
+}={}) {
     const alert = useRef(null);
     const [shown, setShown] = useState(true);
 
@@ -57,7 +57,7 @@ export function BootstrapAlertHeading({
     children,
     ...props
 
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "alert-heading")
@@ -77,7 +77,7 @@ export function BootstrapAlertLink({
     children,
     ...props
 
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "alert-link")

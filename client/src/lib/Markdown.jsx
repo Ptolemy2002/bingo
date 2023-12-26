@@ -5,14 +5,15 @@ import BootstrapButton from "./Bootstrap/Button";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
+import { combineClassNames } from "src/lib/Misc";
 
-export function MarkdownLink({ node, href, children, ...props }) {
+export function MarkdownLink({ node, href, children, ...props }={}) {
     return (
         <Link to={href} {...props} target="_blank" rel="noopener noreferrer">{children}</Link>
     );
 }
 
-export default function MarkdownRenderer({ baseHLevel=1, children, ...props }) {
+export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}) {
     const hLevelOverride = {};
 
     for (let i = 1; i <= 6; i++) {
@@ -38,7 +39,7 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }) {
     );
 }
 
-export function MarkdownEditorButtons({ elementRef, show: initShow, ...props }) {
+export function MarkdownEditorButtons({ elementRef, show: initShow, className, ...props }={}) {
     const [show, setShow] = useState(initShow);
 
     function manualOnChange(newValue) {
@@ -89,7 +90,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, ...props }) 
 
     if (show) {
         return (
-            <div className="markdown-editor-buttons" {...props}>
+            <div className={combineClassNames("markdown-editor-btns", className)} {...props}>
                 <BootstrapButton
                     type="secondary"
                     outline={true}
@@ -141,7 +142,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, ...props }) 
         );
     } else {
         return (
-            <div className="markdown-editor-buttons" {...props}>
+            <div className={combineClassNames("markdown-editor-btns", className)} {...props}>
                 <BootstrapButton
                     type="secondary"
                     outline={true}

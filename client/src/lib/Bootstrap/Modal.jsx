@@ -6,7 +6,7 @@ export default function BootstrapModal({
     children,
     className,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         id,
@@ -34,7 +34,7 @@ export function BootstrapModalHeader({
     children,
     className,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(
@@ -58,7 +58,7 @@ export function BootstrapModalBody({
     children,
     className,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(
@@ -80,7 +80,7 @@ export function BootstrapModalFooter({
     cancelProps = {},
     cancelText = "Cancel",
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(

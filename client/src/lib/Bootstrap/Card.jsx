@@ -5,7 +5,7 @@ export default function BootstrapCard({
     className = null,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card")
@@ -23,7 +23,7 @@ export function BootstrapCardBody({
     children,
     ...props
 
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card-body")
@@ -41,7 +41,7 @@ export function BootstrapCardTitle({
     hLevel = 5,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card-title")
@@ -61,7 +61,7 @@ export function BootstapCardSubtitle({
     hLevel = 6,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card-subtitle"),
@@ -80,7 +80,7 @@ export function BootstrapCardText({
     className = null,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card-text")
@@ -97,7 +97,7 @@ export function BootstrapCardImage({
     className = null,
     position = "top",
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(className, "card-img-" + position),

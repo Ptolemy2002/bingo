@@ -26,7 +26,7 @@ export default function App() {
 
 function Header({
     title
-}) {
+}={}) {
     const currentPath = useCurrentPath();
 
     const navItems = routes.map((route) => {
@@ -72,7 +72,7 @@ function NavItem({
     path,
     text,
     active
-}) {
+}={}) {
     let className = "nav-link";
     if (active) {
         className += " active";

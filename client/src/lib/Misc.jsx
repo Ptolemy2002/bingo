@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 
-export function listInPlainEnglish(list, {max = undefined, conjunction = "and"}) {
+export function listInPlainEnglish(list, {max = undefined, conjunction = "and"}={}) {
     if (max === undefined) max = list.length;
     
 
@@ -59,7 +59,8 @@ export function useForceRerender() {
     return update;
 }
 
-export function Spacer({ height = "1rem" }) {
-    return <span className="spacer" style={{ display: "block", marginBottom: height}} />;
+export function Spacer({ height = "1rem", horizontal = false }={}) {
+    const keyName = horizontal ? "width" : "height";
+    return <div className="spacer" style={{ [keyName]: height }} />;
 }
 

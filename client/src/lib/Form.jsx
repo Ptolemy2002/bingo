@@ -41,7 +41,7 @@ export function EditField({
 
     manualSave = false,
     fieldRef = null
-}) {
+}={}) {
     const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
     const [custom, _setCustom] = useState(initCustom);
@@ -192,7 +192,7 @@ export function CustomStringField({
 
     manualSave = false,
     fieldRef = null
-}) {
+}={}) {
     return (
         <EditField
             name={name}
@@ -229,7 +229,7 @@ export function CustomNumberField({
 
     manualSave = false,
     fieldRef = null
-}) {
+}={}) {
     return (
         <EditField
             name={name}
@@ -258,7 +258,7 @@ export function FieldList({
     types: initTypeList = [],
     typeMap = {},
     defaultValue = ""
-}) {
+}={}) {
     const listRef = useRef(initList);
     const keysListRef = useRef(initList.map(() => nanoid()));
     const typeListRef = useRef(initTypeList);

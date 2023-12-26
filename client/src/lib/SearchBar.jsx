@@ -11,7 +11,7 @@ export default function SearchBar({
     staticMatchWhole: initialStaticMatchWhole = false,
     categories = [],
     destinationPath
-}) {
+}={}) {
     const [query, setQuery] = useState(initialQuery);
     const [category, setCategory] = useState(initialCategory);
     const [matchWhole, setMatchWhole] = useState(initialMatchWhole);

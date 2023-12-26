@@ -9,7 +9,7 @@ export default function BootstrapButton({
     outline = false,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(
@@ -35,7 +35,7 @@ export function BootstrapButtonLink({
     outline = false,
     children,
     ...props
-}) {
+}={}) {
     const newProps = {
         ...props,
         className: combineClassNames(
