@@ -227,6 +227,104 @@
         }
       }
     },
+
+    "/spaces/by-exact-name/{name}": {
+      "get": {
+        "description": "Get the bingo space with the given name (case sensitive, accent sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the bingo space to get.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete the bingo space with the given name (case sensitive, accent sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the bingo space to delete.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+
+    "/spaces/key/by-exact-id/{id}": {
+      "get": {
+        "description": "Get the key of the bingo space with the given id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the bingo space to get the key of.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Response body contains the key of the bingo space."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete the bingo space with the given id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the bingo space to delete.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "404": {
+            "description": "Not found. Response body contains error details."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
     
     "/spaces/{key}-{comparison}/{value}/count": {
       "get": {
