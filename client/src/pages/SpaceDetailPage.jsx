@@ -393,6 +393,7 @@ export function SpaceDetailEdit({
 
             <MarkdownEditorButtons
                 elementRef={descriptionFieldRef}
+                show={true}
                 className="btns-hor mb-3"
             />
 
@@ -400,7 +401,7 @@ export function SpaceDetailEdit({
                 description ? (
                     <div className="markdown-preview">
                         <h6>Markdown Preview</h6>
-                        <MarkdownRenderer>
+                        <MarkdownRenderer baseHLevel={6}>
                             {description}
                         </MarkdownRenderer>
                     </div>

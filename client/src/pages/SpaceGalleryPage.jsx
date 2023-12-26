@@ -377,7 +377,7 @@ export function SpaceCard({ name }) {
                         {tagsElements}
                         <Spacer />
                         <b>Desription:</b> <br />
-                        <MarkdownRenderer>
+                        <MarkdownRenderer baseHLevel={6}>
                             {description}
                         </MarkdownRenderer>
 

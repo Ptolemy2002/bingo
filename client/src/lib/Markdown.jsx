@@ -12,13 +12,25 @@ export function MarkdownLink({ node, href, children, ...props }) {
     );
 }
 
-export default function MarkdownRenderer({ children }) {
+export default function MarkdownRenderer({ baseHLevel=1, children, ...props }) {
+    const hLevelOverride = {};
+
+    for (let i = 1; i <= 6; i++) {
+        if (i + baseHLevel > 6) {
+            hLevelOverride[`h${i}`] = `h6`;
+        } else {
+            hLevelOverride[`h${i}`] = `h${i + baseHLevel}`;
+        }
+    }
+
     return (
         <Markdown
+            {...props}
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
-                a: MarkdownLink
+                a: MarkdownLink,
+                ...hLevelOverride
             }}
         >
             {children}
@@ -26,8 +38,8 @@ export default function MarkdownRenderer({ children }) {
     );
 }
 
-export function MarkdownEditorButtons({ elementRef, ...props }) {
-    const [show, setShow] = useState(false);
+export function MarkdownEditorButtons({ elementRef, show: initShow, ...props }) {
+    const [show, setShow] = useState(initShow);
 
     function manualOnChange(newValue) {
         // This hack is from https://github.com/facebook/react/issues/11488#issuecomment-347775628
@@ -72,7 +84,6 @@ export function MarkdownEditorButtons({ elementRef, ...props }) {
 
         field.selectionStart = start + before.length;
         field.selectionEnd = end + before.length;
-
         field.focus();
     }
 
@@ -90,7 +101,7 @@ export function MarkdownEditorButtons({ elementRef, ...props }) {
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("**", "**")}
+                    onClick={() => wrapSelection("**", "**", "**bold text**")}
                 >
                     Bold
                 </BootstrapButton>
@@ -98,7 +109,7 @@ export function MarkdownEditorButtons({ elementRef, ...props }) {
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("_", "_")}
+                    onClick={() => wrapSelection("_", "_", "_italic text_")}
                 >
                     Italic
                 </BootstrapButton>
@@ -106,7 +117,7 @@ export function MarkdownEditorButtons({ elementRef, ...props }) {
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("~", "~")}
+                    onClick={() => wrapSelection("~", "~", "~strikethrough text~")}
                 >
                     Strikethrough
                 </BootstrapButton>
@@ -114,7 +125,7 @@ export function MarkdownEditorButtons({ elementRef, ...props }) {
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("$", "$")}
+                    onClick={() => wrapSelection("$", "$", "$x^2$")}
                 >
                     Math
                 </BootstrapButton>
