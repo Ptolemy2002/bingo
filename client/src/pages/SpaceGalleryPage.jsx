@@ -304,8 +304,6 @@ export function SpaceGalleryPage({
                 <h2>Space Gallery</h2>
                 {searchBarElement}
                 <Spacer />
-                
-                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found results (Page {page} of {pageCount})</p>
 
                 <div className="btns-hor mb-3">
                     <BootstrapButton
@@ -349,7 +347,8 @@ export function SpaceGalleryPage({
                         }
                     </BootstrapModal.ActivateButton>
                 </div>
-
+                
+                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found results (Page {page} of {pageCount})</p>
                 <div className="btns-hor mb-1">
                     <BootstrapButton
                         type="secondary"
