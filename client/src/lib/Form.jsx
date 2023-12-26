@@ -250,6 +250,7 @@ export function FieldList({
     setList: setListHandler,
     types: initTypeList = [],
     typeMap = {},
+    defaultValue = ""
 }) {
     const listRef = useRef(initList);
     const keysListRef = useRef(initList.map(() => nanoid()));
@@ -329,7 +330,7 @@ export function FieldList({
         const {label} = typeMap[type];
 
         return (
-            <BootstrapButton key={"add-button-" + type} type="secondary" outline={true} onClick={() => add(type, "")}>
+            <BootstrapButton key={"add-button-" + type} type="secondary" outline={true} onClick={() => add(type, defaultValue)}>
                 Add "{label}"
             </BootstrapButton>
         );

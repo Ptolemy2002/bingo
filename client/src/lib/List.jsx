@@ -37,3 +37,12 @@ export function listSet(list, i, element) {
     newList[i] = element;
     return newList;
 }
+
+export function isSet(list) {
+    const seen = [];
+    for(let i = 0; i < list.length; i++) {
+        if (seen.includes(list[i])) return false;
+        seen.push(list[i]);
+    }
+    return true;
+}

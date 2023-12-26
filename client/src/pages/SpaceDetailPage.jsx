@@ -9,6 +9,7 @@ import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import { CustomStringField, EditField, FieldList } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
+import { isSet } from "src/lib/List";
 
 export default function QueryWrapper() {
     const { name } = useParams();
@@ -298,6 +299,7 @@ export function SpaceDetailEdit({
     const [description, setDescription] = useState(data.description);
     const [examples, setExamples] = useState(data.examples);
     const [tags, setTags] = useState(data.tags);
+    const [saveError, setSaveError] = useState(null);
 
     const [tagList, tagListStatus, tagListRefresh] = useApi("spaces/all/list-tag/distinct", true);
 
@@ -306,11 +308,49 @@ export function SpaceDetailEdit({
     });
 
     function save() {
+        if (name === "") {
+            setSaveError("The name cannot be empty.");
+            return false;
+        }
+
+        if (aliases.some((i) => i === "")) {
+            setSaveError("An empty alias was detected. Please remove it or enter a value.");
+            return false;
+        }
+
+        if (!isSet(aliases)) {
+            setSaveError("Duplicate aliases were detected. Please remove them or enter unique values.");
+            return false;
+        }
+
+        if (examples.some((i) => i === "")) {
+            setSaveError("An empty example was detected. Please remove it or enter a value.");
+            return false;
+        }
+
+        if (!isSet(examples)) {
+            setSaveError("Duplicate examples were detected. Please remove them or enter unique values.");
+            return false;
+        }
+
+        if (tags.some((i) => i === "")) {
+            setSaveError("An empty tag was detected. Please remove it or enter a value.");
+            return false;
+        }
+
+        if (!isSet(tags)) {
+            setSaveError("Duplicate tags were detected. Please remove them or enter unique values.");
+            return false;
+        }
+
         data.name = name;
         data.aliases = aliases;
         data.description = description;
         data.examples = examples;
         data.tags = tags;
+
+        setSaveError(null);
+        return true;
     }
 
     return (
@@ -393,13 +433,22 @@ export function SpaceDetailEdit({
                         }
                     }
                 }}
+                defaultValue={tagList ? tagList[0] : ""}
             />
 
             <h2>Options</h2>
+            {
+                saveError ? (
+                    <BootstrapAlert type="danger" allowDismiss={true}>
+                        <BootstrapAlert.Heading>Failed to Save Changes</BootstrapAlert.Heading>
+                        <p>{saveError}</p>
+                    </BootstrapAlert>
+                ) : null
+            }
+
             <div className="btns-hor">
                 <button className="btn btn-outline-secondary" onClick={() => {
-                        save();
-                        exit();
+                        if (save()) exit();
                     }}
                 >
                     Save Changes
