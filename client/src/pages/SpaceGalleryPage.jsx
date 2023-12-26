@@ -247,6 +247,33 @@ export function SpaceGalleryPage({
                             No spaces found
                         </BootstrapAlert.Heading>
                     </BootstrapAlert>
+
+                    <div className="btns-hor">
+                        <BootstrapButton
+                            type="primary"
+                            outline={true}
+                            onClick={refresh}
+                            disabled={spaceNamesStatus.started && !spaceNamesStatus.completed}
+                        >
+                            Refresh
+                        </BootstrapButton>
+
+                        <BootstrapButton
+                            type="success"
+                            outline={true}
+                            onClick={createNewSpace}
+                            disabled={newSpaceStatus.started && !newSpaceStatus.completed}
+                        >
+                            {
+                                newSpaceStatus.started && !newSpaceStatus.completed ?
+                                    "Creating...":
+                                newSpaceStatus.started && newSpaceStatus.failed ?
+                                    "Failed to Create":
+                                // Else
+                                    "Create New Space"
+                            }
+                        </BootstrapButton>
+                    </div>
                 </div>
             );
         }
@@ -303,6 +330,22 @@ export function SpaceGalleryPage({
                         Next Page
                     </BootstrapButton>
 
+                    <BootstrapButton
+                        type="success"
+                        outline={true}
+                        onClick={createNewSpace}
+                        disabled={newSpaceStatus.started && !newSpaceStatus.completed}
+                    >
+                        {
+                            newSpaceStatus.started && !newSpaceStatus.completed ?
+                                "Creating...":
+                            newSpaceStatus.started && newSpaceStatus.failed ?
+                                "Failed to Create":
+                            // Else
+                                "Create New Space"
+                        }
+                    </BootstrapButton>
+
                     <BootstrapModal.ActivateButton
                         modalId="delete-modal"
                         type="danger"
@@ -318,22 +361,6 @@ export function SpaceGalleryPage({
                                 "Delete All"
                         }
                     </BootstrapModal.ActivateButton>
-
-                    <BootstrapButton
-                        type="secondary"
-                        outline={true}
-                        onClick={createNewSpace}
-                        disabled={newSpaceStatus.started && !newSpaceStatus.completed}
-                    >
-                        {
-                            newSpaceStatus.started && !newSpaceStatus.completed ?
-                                "Creating...":
-                            newSpaceStatus.started && newSpaceStatus.failed ?
-                                "Failed to Create":
-                            // Else
-                                "Create New Space"
-                        }
-                    </BootstrapButton>
                 </div>
                 
                 <div className="card-container">
