@@ -357,7 +357,7 @@ export class BingoSpaceData {
     }
 }
 
-export function useBingoSpaceData(value, primaryKey="name") {
+export function useBingoSpaceData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
     const _push = useApi(`spaces/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _pull = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _duplicate = useApi(`spaces/new`)[2];
@@ -375,7 +375,7 @@ export function useBingoSpaceData(value, primaryKey="name") {
 
     // Start pulling data on first mount
     useMountEffect(() => {
-        spaceData.pull();
+        spaceData.pull(onPullSuccess, onPullFailure);
     });
 
     return spaceData;

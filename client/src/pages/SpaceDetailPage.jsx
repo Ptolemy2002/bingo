@@ -11,16 +11,23 @@ import { CustomStringField, EditField, FieldList } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
 
-export default function QueryWrapper() {
+export default function QueryWrapper({editMode: initEditMode=false}) {
     const { name } = useParams();
 
     return (
-        <SpaceDetailPage name={name} />
+        <SpaceDetailPage
+            name={name}
+            editMode={initEditMode}
+        />
     );
 }
 
-export function SpaceDetailPage({ name }) {
-    const spaceData = useBingoSpaceData(name);
+export function SpaceDetailPage({ name, editMode: initEditMode=false }) {
+    const spaceData = useBingoSpaceData(name, {
+        onPullSuccess: () => {
+            setEditMode(initEditMode);
+        }
+    });
 
     document.title = `${spaceData.name} | Bingo App`;
     const [editMode, _setEditMode] = useState(false);

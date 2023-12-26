@@ -20,6 +20,11 @@ export const routes = [
     {
         path: "/space/:name",
         element: <SpaceDetailPage />
+    },
+
+    {
+        path: "/space/:name/edit",
+        element: <SpaceDetailPage editMode={true} />
     }
 ];
 

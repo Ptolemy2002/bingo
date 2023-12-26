@@ -396,7 +396,7 @@ export function SpaceCard({ name }) {
                         type="primary"
                         className="mb-2"
                         outline={true}
-                        to={`/space/${data.name}`}
+                        to={`/space/${encodeURIComponent(data.name)}`}
                     >
                         View Details
                     </BootstrapButtonLink>
