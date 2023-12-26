@@ -93,6 +93,8 @@ export default function QueryWrapper() {
     const query = queryParams.get("query") || "";
     const category = queryParams.get("category") || "known-as";
     const matchWhole = queryParams.get("matchWhole") === "true";
+    const perPage = queryParams.get("perPage") || 20;
+
 
     let deletePath = "spaces/all";
     
@@ -115,6 +117,7 @@ export default function QueryWrapper() {
             matchWhole={matchWhole}
             queryPath={deletePath + "/list-name/distinct"}
             deletePath={deletePath}
+            perPage={perPage}
         />
     );
 }
@@ -124,7 +127,8 @@ export function SpaceGalleryPage({
     category = "general",
     matchWhole = true,
     queryPath = "spaces/all/list-name/distinct",
-    deletePath = "spaces/all"
+    deletePath = "spaces/all",
+    perPage = 20
 }={}) {
     if (query && category) {
         document.title = `Space search results for "${query}" | Bingo App`;
@@ -150,9 +154,14 @@ export function SpaceGalleryPage({
     const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false);
     const [, newSpaceStatus, sendNewSpaceRequest] = useApi("spaces/new", false);
 
+    const [page, setPage] = React.useState(1);
+
     function refresh() {
         sendSpaceNamesRequest({
-            method: "GET"
+            method: "GET",
+            onSuccess: () => {
+                setPage(1);
+            }
         });
     }
     useMountEffect(refresh);
@@ -221,7 +230,34 @@ export function SpaceGalleryPage({
             </div>
         );
     } else {
-        const spaceCards = spaceNames.map((name, i) => {
+        const pageCount = Math.ceil(spaceNames.length / perPage);
+
+        if (pageCount === 0) {
+            return (
+                <div className="SpaceGalleryPage container">
+                    <h2>Space Gallery</h2>
+                    {searchBarElement}
+                    <Spacer />
+
+                    <BootstrapAlert
+                        type="info"
+                        allowDismiss={false}
+                    >
+                        <BootstrapAlert.Heading>
+                            No spaces found
+                        </BootstrapAlert.Heading>
+                    </BootstrapAlert>
+                </div>
+            );
+        }
+
+        if (page < 1) setPage(1);
+        if (page > pageCount) setPage(pageCount);
+
+        const startIndex = (page - 1) * perPage;
+        const endIndex = Math.min(startIndex + perPage, spaceNames.length);
+
+        const spaceCards = spaceNames.slice(startIndex, endIndex).map((name, i) => {
             if (name.type === "search-result") name = name.value;
             return (
                 <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
@@ -238,7 +274,7 @@ export function SpaceGalleryPage({
                 {searchBarElement}
                 <Spacer />
                 
-                <p>{spaceNames.length} result(s)</p>
+                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found results (Page {page} of {pageCount})</p>
                 <div className="btns-hor mb-3">
                     <BootstrapButton
                         type="primary"
@@ -247,6 +283,24 @@ export function SpaceGalleryPage({
                         disabled={spaceNamesStatus.started && !spaceNamesStatus.completed}
                     >
                         Refresh
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                    >
+                        Previous Page
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page >= pageCount}
+                        onClick={() => setPage(page + 1)}
+                    >
+                        Next Page
                     </BootstrapButton>
 
                     <BootstrapModal.ActivateButton
@@ -261,7 +315,7 @@ export function SpaceGalleryPage({
                             deleteStatus.started && deleteStatus.failed ?
                                 "Failed to Delete":
                             // Else
-                                "Delete"
+                                "Delete All"
                         }
                     </BootstrapModal.ActivateButton>
 
@@ -288,13 +342,34 @@ export function SpaceGalleryPage({
                     </div>
                 </div>
 
+                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found result(s) (Page {page} of {pageCount})</p>
+                <div className="btns-hor">
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                    >
+                        Previous Page
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page >= pageCount}
+                        onClick={() => setPage(page + 1)}
+                    >
+                        Next Page
+                    </BootstrapButton>
+                </div>
+
                 <BootstrapModal id="delete-modal">
                     <BootstrapModal.Header>
                         Delete All Spaces
                     </BootstrapModal.Header>
                     <BootstrapModal.Body>
                         <p>
-                            Are you sure you want to delete all spaces shown in the current search results?
+                            Are you sure you want to delete all {spaceNames.length} spaces found by this search? This action cannot be undone.
                         </p>
                     </BootstrapModal.Body>
                     <BootstrapModal.Footer
@@ -311,7 +386,6 @@ export function SpaceGalleryPage({
                         </BootstrapButton>
                     </BootstrapModal.Footer>
                 </BootstrapModal>
-
             </div>
         );
     }
