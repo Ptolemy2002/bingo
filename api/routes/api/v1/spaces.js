@@ -218,7 +218,6 @@ async function newSpace(data) {
 
 async function updateSpace(query, data) {
     const result = await mongo.update(SpaceModel, query, data, {});
-    console.log(result, data);
     return result;
 }
 

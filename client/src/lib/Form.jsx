@@ -129,13 +129,13 @@ export function EditField({
                     textArea ? (
                         <textarea
                             placeholder={placeholder}
-                            className="form-control"
+                            className="form-control mb-1"
                             value={value}
                             onChange={onChange}
                             name={name}
                         />
                     ) : (
-                        <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={onChange} name={name} />
+                        <input type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
                     )
                 }
 

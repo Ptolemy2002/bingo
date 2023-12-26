@@ -349,6 +349,17 @@ export function SpaceDetailEdit({
                 textArea={true}
             />
 
+            {
+                description ? (
+                    <div className="markdown-preview">
+                        <h6>Markdown Preview</h6>
+                        <MarkdownRenderer>
+                            {description}
+                        </MarkdownRenderer>
+                    </div>
+                ) : null
+            }
+
             <h2>Examples</h2>
             <FieldList
                 list={examples}

@@ -127,15 +127,19 @@ export function SpaceGalleryPage({
     }
 
     const [spaceNames, spaceNamesStatus, sendSpaceNamesRequest] = useApi(queryPath, true, (a, b) => {
+        function cleanString(str) {
+            return str.toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
+        }
+
         if (a.type === "search-result" && b.type === "search-result") {
             if (Math.abs(a._score - b._score) > Number.EPSILON) {
                 return b._score - a._score;
             } else {
-                return a.value.localeCompare(b.value);
+                return cleanString(a.value).localeCompare(cleanString(b.value));
             }
         }
 
-        return a.localeCompare(b);
+        return cleanString(a).localeCompare(cleanString(b));
     });
     const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false);
     const [, newSpaceStatus, sendNewSpaceRequest] = useApi("spaces/new", false);
