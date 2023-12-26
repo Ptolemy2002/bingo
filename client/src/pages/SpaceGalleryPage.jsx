@@ -10,6 +10,7 @@ import BootstrapCard from "src/lib/Bootstrap/Card";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import BootstrapModal from "src/lib/Bootstrap/Modal";
 import MarkdownRenderer from "src/lib/Markdown";
+import { PageField } from "src/lib/Form";
 
 const searchCategories = [
     {
@@ -94,6 +95,7 @@ export default function QueryWrapper() {
     const category = queryParams.get("category") || "known-as";
     const matchWhole = queryParams.get("matchWhole") === "true";
     const perPage = queryParams.get("perPage") || 20;
+    const startPage = queryParams.get("page") || 1;
 
 
     let deletePath = "spaces/all";
@@ -118,6 +120,7 @@ export default function QueryWrapper() {
             queryPath={deletePath + "/list-name/distinct"}
             deletePath={deletePath}
             perPage={perPage}
+            startPage={startPage}
         />
     );
 }
@@ -128,7 +131,8 @@ export function SpaceGalleryPage({
     matchWhole = true,
     queryPath = "spaces/all/list-name/distinct",
     deletePath = "spaces/all",
-    perPage = 20
+    perPage = 20,
+    startPage = 1
 }={}) {
     if (query && category) {
         document.title = `Space search results for "${query}" | Bingo App`;
@@ -154,7 +158,7 @@ export function SpaceGalleryPage({
     const [, deleteStatus, sendDeleteRequest] = useApi(deletePath, false);
     const [, newSpaceStatus, sendNewSpaceRequest] = useApi("spaces/new", false);
 
-    const [page, setPage] = React.useState(1);
+    const [page, setPage] = React.useState(startPage);
 
     function refresh() {
         sendSpaceNamesRequest({
@@ -302,6 +306,7 @@ export function SpaceGalleryPage({
                 <Spacer />
                 
                 <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found results (Page {page} of {pageCount})</p>
+
                 <div className="btns-hor mb-3">
                     <BootstrapButton
                         type="primary"
@@ -310,24 +315,6 @@ export function SpaceGalleryPage({
                         disabled={spaceNamesStatus.started && !spaceNamesStatus.completed}
                     >
                         Refresh
-                    </BootstrapButton>
-
-                    <BootstrapButton
-                        type="secondary"
-                        outline={true}
-                        disabled={page <= 1}
-                        onClick={() => setPage(page - 1)}
-                    >
-                        Previous Page
-                    </BootstrapButton>
-
-                    <BootstrapButton
-                        type="secondary"
-                        outline={true}
-                        disabled={page >= pageCount}
-                        onClick={() => setPage(page + 1)}
-                    >
-                        Next Page
                     </BootstrapButton>
 
                     <BootstrapButton
@@ -362,15 +349,17 @@ export function SpaceGalleryPage({
                         }
                     </BootstrapModal.ActivateButton>
                 </div>
-                
-                <div className="card-container">
-                    <div className="row g-3">
-                        {spaceCards}
-                    </div>
-                </div>
 
-                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found result(s) (Page {page} of {pageCount})</p>
-                <div className="btns-hor">
+                <div className="btns-hor mb-1">
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        onClick={() => setPage(1)}
+                        disabled={page <= 1}
+                    >
+                        First Page
+                    </BootstrapButton>
+
                     <BootstrapButton
                         type="secondary"
                         outline={true}
@@ -388,11 +377,77 @@ export function SpaceGalleryPage({
                     >
                         Next Page
                     </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page >= pageCount}
+                        onClick={() => setPage(pageCount)}
+                    >
+                        Last Page
+                    </BootstrapButton>
                 </div>
+                <PageField
+                    page={page}
+                    pageCount={pageCount}
+                    setPage={setPage}
+                    className="mt-1"
+                />
+                <Spacer />
+                
+                <div className="card-container">
+                    <div className="row g-3">
+                        {spaceCards}
+                    </div>
+                </div>
+
+                <p className="mt-2 mb-1">Showing {startIndex + 1}-{endIndex} of {spaceNames.length} found result(s) (Page {page} of {pageCount})</p>
+                <div className="btns-hor mb-1">
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        onClick={() => setPage(1)}
+                        disabled={page <= 1}
+                    >
+                        First Page
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                    >
+                        Previous Page
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page >= pageCount}
+                        onClick={() => setPage(page + 1)}
+                    >
+                        Next Page
+                    </BootstrapButton>
+
+                    <BootstrapButton
+                        type="secondary"
+                        outline={true}
+                        disabled={page >= pageCount}
+                        onClick={() => setPage(pageCount)}
+                    >
+                        Last Page
+                    </BootstrapButton>
+                </div>
+                <PageField
+                    page={page}
+                    pageCount={pageCount}
+                    setPage={setPage}
+                />
 
                 <BootstrapModal id="delete-modal">
                     <BootstrapModal.Header>
-                        Delete All Spaces
+                        Delete Found Spaces
                     </BootstrapModal.Header>
                     <BootstrapModal.Body>
                         <p>

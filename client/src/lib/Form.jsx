@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { isNullOrUndefined } from "src/lib/Misc";
+import { Spacer, combineClassNames, isNullOrUndefined } from "src/lib/Misc";
 import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
 import { useForceRerender } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
@@ -40,7 +40,10 @@ export function EditField({
     failedMessage = "Failed.",
 
     manualSave = false,
-    fieldRef = null
+    saveText = "Save",
+    fieldRef = null,
+
+    className = null
 }={}) {
     const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
@@ -67,7 +70,7 @@ export function EditField({
             if (v === "-" && (isNullOrUndefined(min) || min < 0)) return true;
             if (v === "+" && (isNullOrUndefined(max) || max >= 0)) return true;
             if (isNaN(v) || isNaN(parseFloat(v))) return false;
-            if (integer && !Number.isInteger(v)) return false;
+            if (integer && !(/^\d+$/.test(v))) return false;
             if (!isNullOrUndefined(min) && v < min) return false;
             if (!isNullOrUndefined(max) && v > max) return false;
         }
@@ -76,7 +79,7 @@ export function EditField({
     }
 
     function onChange(event) {
-        console.log("onChange");
+
         if (!validate(event.target.value)) return;
         setValue(event.target.value);
     }
@@ -116,7 +119,7 @@ export function EditField({
                         outline={true} 
                         onClick={() => {if (setValueHandler) setValueHandler(value)}}
                     >
-                        Save
+                        {saveText}
                     </BootstrapButton>
                 ) : null
             }
@@ -125,24 +128,27 @@ export function EditField({
 
     if (custom) {
         return (
-            <div className="form-group mb-2">
-                <label htmlFor={name}><h6>{label}</h6></label>
-                {
-                    textArea ? (
-                        <textarea
-                            ref={fieldRef}
-                            placeholder={placeholder}
-                            className="form-control mb-1"
-                            value={value}
-                            onChange={onChange}
-                            name={name}
-                        />
-                    ) : (
-                        <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
-                    )
-                }
+            <div className={combineClassNames("form-group mb-1", className)}>
+                {name ? <label htmlFor={name}><h6>{label}</h6></label> : null}
 
-                {optionsElement}
+                <div className="d-flex flex-row">
+                    {
+                        textArea ? (
+                            <textarea
+                                ref={fieldRef}
+                                placeholder={placeholder}
+                                className="form-control mb-1"
+                                value={value}
+                                onChange={onChange}
+                                name={name}
+                            />
+                        ) : (
+                            <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
+                        )
+                    }
+                    <Spacer horizontal={true} size="0.2rem" />
+                    {optionsElement}
+                </div>
             </div>
         );
     } else {
@@ -165,8 +171,8 @@ export function EditField({
             });
 
             return (
-                <div className="form-group mb-1">
-                    <label htmlFor={name}><h6>{label}</h6></label>
+                <div className={combineClassNames("form-group mb-1", className)}>
+                    {name ? <label htmlFor={name}><h6>{label}</h6></label> : null}
                     <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
                         {choices}
                     </select>
@@ -191,7 +197,10 @@ export function CustomStringField({
     validate: _validate,
 
     manualSave = false,
-    fieldRef = null
+    saveText = "Save",
+    fieldRef = null,
+
+    className = null
 }={}) {
     return (
         <EditField
@@ -206,7 +215,9 @@ export function CustomStringField({
             placeholder={placeholder}
             validate={_validate}
             manualSave={manualSave}
+            saveText={saveText}
             fieldRef={fieldRef}
+            className={className}
         />
     );
 }
@@ -228,7 +239,10 @@ export function CustomNumberField({
     validate: _validate,
 
     manualSave = false,
-    fieldRef = null
+    saveText = "Save",
+    fieldRef = null,
+
+    className = null
 }={}) {
     return (
         <EditField
@@ -247,7 +261,9 @@ export function CustomNumberField({
             max={max}
             validate={_validate}
             manualSave={manualSave}
+            saveText={saveText}
             fieldRef={fieldRef}
+            className={className}
         />
     );
 }
@@ -353,5 +369,36 @@ export function FieldList({
                 </div>
             </div>
         </div>
+    );
+}
+
+export function PageField({
+    name,
+    label,
+
+    page=1,
+    setPage: setPageHandler,
+    pageCount=1,
+
+    fieldRef = null,
+    className = null
+}={}) {
+    return (
+        <EditField
+            name={name}
+            label={label}
+            value={page}
+            setValue={setPageHandler}
+            defaultValue={page}
+            placeholder="Enter a page number"
+            number={true}
+            integer={true}
+            min={1}
+            max={pageCount}
+            manualSave={true}
+            saveText="Go"
+            fieldRef={fieldRef}
+            className={className}
+        />
     );
 }

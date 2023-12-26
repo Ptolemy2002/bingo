@@ -59,8 +59,8 @@ export function useForceRerender() {
     return update;
 }
 
-export function Spacer({ height = "1rem", horizontal = false }={}) {
+export function Spacer({ size = "1rem", horizontal = false }={}) {
     const keyName = horizontal ? "width" : "height";
-    return <div className="spacer" style={{ [keyName]: height }} />;
+    return <div className="spacer" style={{ [keyName]: size }} />;
 }
 
