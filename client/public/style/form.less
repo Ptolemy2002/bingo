@@ -30,3 +30,36 @@
         gap: 10px;
     }
 }
+
+.form-row {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    label * {
+        width: fit-content;
+    }
+
+    input, textarea, select {
+        width: unset;
+        flex-grow: 1;
+    }
+}
+
+.form-column {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-field {
+    .bs-breakpoint-max(sm, {
+        width: 100%;
+    });
+
+    .bs-breakpoint-min(md, {
+        width: 50%;
+    });
+}

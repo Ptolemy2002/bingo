@@ -390,7 +390,7 @@ export function SpaceGalleryPage({
                     page={page}
                     pageCount={pageCount}
                     setPage={setPage}
-                    className="mt-1"
+                    className="page-field mt-1"
                 />
                 <Spacer />
                 
@@ -438,10 +438,12 @@ export function SpaceGalleryPage({
                         Last Page
                     </BootstrapButton>
                 </div>
+                
                 <PageField
                     page={page}
                     pageCount={pageCount}
                     setPage={setPage}
+                    className="page-field mt-1"
                 />
 
                 <BootstrapModal id="delete-modal">

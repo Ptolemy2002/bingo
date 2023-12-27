@@ -43,7 +43,9 @@ export function EditField({
     saveText = "Save",
     fieldRef = null,
 
-    className = null
+    className = null,
+    column = false,
+    hLevel = 6
 }={}) {
     const [value, _setValue] = useState(initValue);
     const [prevValue, setPrevValue] = useState(value);
@@ -79,7 +81,6 @@ export function EditField({
     }
 
     function onChange(event) {
-
         if (!validate(event.target.value)) return;
         setValue(event.target.value);
     }
@@ -127,26 +128,38 @@ export function EditField({
     );
 
     if (custom) {
+        const HTag = "h" + hLevel;
         return (
             <div className={combineClassNames("form-group mb-1", className)}>
-                {name ? <label htmlFor={name}><h6>{label}</h6></label> : null}
-
-                <div className="d-flex flex-row">
+                <div className="form-row">
+                    {name && !textArea && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                     {
                         textArea ? (
-                            <textarea
-                                ref={fieldRef}
-                                placeholder={placeholder}
-                                className="form-control mb-1"
-                                value={value}
-                                onChange={onChange}
-                                name={name}
-                            />
-                        ) : (
+                            <div className="form-column">
+                                {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                <textarea
+                                    ref={fieldRef}
+                                    placeholder={placeholder}
+                                    className="form-control mb-1"
+                                    value={value}
+                                    onChange={onChange}
+                                    name={name}
+                                />
+                            </div>
+                        ):
+                        // Else If
+                        column ? (
+                            <div className="form-column">
+                                {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
+                            </div>
+                        ):
+                        // Else
+                        (    
                             <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
                         )
                     }
-                    <Spacer horizontal={true} size="0.2rem" />
+
                     {optionsElement}
                 </div>
             </div>
@@ -154,7 +167,10 @@ export function EditField({
     } else {
         if (!listStatus.completed) {
             return (
-                <p>{inProgressMessage}</p>
+                <BootstrapAlert type="info" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Loading...</BootstrapAlert.Heading>
+                    <p>{inProgressMessage}</p>
+                </BootstrapAlert>
             );
         } else if (listStatus.failed) {
             return (
@@ -170,13 +186,35 @@ export function EditField({
                 );
             });
 
+            const HTag = "h" + hLevel;
+
             return (
                 <div className={combineClassNames("form-group mb-1", className)}>
-                    {name ? <label htmlFor={name}><h6>{label}</h6></label> : null}
-                    <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
-                        {choices}
-                    </select>
-                    {optionsElement}
+                    <div className="form-row">
+                        {name && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+
+                        {
+                            column ? (
+                                <div className="form-column">
+                                    {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                    <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
+                                        {choices}
+                                    </select>
+                                    {optionsElement}
+                                </div>
+                            ):
+                            // Else
+                            (
+                                <div className="form-column">
+                                    {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                    <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
+                                        {choices}
+                                    </select>
+                                    {optionsElement}
+                                </div>
+                            )
+                        }
+                    </div>
                 </div>
             );
         }
@@ -200,7 +238,8 @@ export function CustomStringField({
     saveText = "Save",
     fieldRef = null,
 
-    className = null
+    className = null,
+    column = false
 }={}) {
     return (
         <EditField
@@ -218,6 +257,7 @@ export function CustomStringField({
             saveText={saveText}
             fieldRef={fieldRef}
             className={className}
+            column={column}
         />
     );
 }
@@ -242,7 +282,8 @@ export function CustomNumberField({
     saveText = "Save",
     fieldRef = null,
 
-    className = null
+    className = null,
+    column = false
 }={}) {
     return (
         <EditField
@@ -264,6 +305,7 @@ export function CustomNumberField({
             saveText={saveText}
             fieldRef={fieldRef}
             className={className}
+            column={column}
         />
     );
 }
@@ -381,7 +423,8 @@ export function PageField({
     pageCount=1,
 
     fieldRef = null,
-    className = null
+    className = null,
+    column = false
 }={}) {
     return (
         <EditField
@@ -399,6 +442,7 @@ export function PageField({
             saveText="Go"
             fieldRef={fieldRef}
             className={className}
+            column={column}
         />
     );
 }

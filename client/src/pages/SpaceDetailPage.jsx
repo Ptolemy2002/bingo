@@ -372,6 +372,7 @@ export function SpaceDetailEdit({
                 value={name}
                 setValue={setName}
                 placeholder="Enter a name"
+                column={true}
             />
 
             <h6>Aliases</h6>
@@ -496,6 +497,7 @@ export function AliasField({
                 value={value}
                 setValue={setValue}
                 placeholder="Enter an alias"
+                column={true}
             />
 
             <div className="btns-hor">
@@ -548,6 +550,7 @@ export function ExampleField({
                 value={value}
                 setValue={setValue}
                 placeholder="Enter an example"
+                column={true}
             />
 
             <div className="btns-hor">
@@ -618,6 +621,8 @@ export function TagField({
                 refreshMessage="Refresh Options"
                 inProgressMessage="Retrieving tags..."
                 failureMessage="Failed to retrieve tags. Error details logged to console."
+
+                column={true}
             />
             <Spacer />
             <div className="btns-hor">
