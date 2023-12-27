@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { Spacer, combineClassNames, isNullOrUndefined } from "src/lib/Misc";
+import {combineClassNames, isNullOrUndefined } from "src/lib/Misc";
 import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
 import { useForceRerender } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
@@ -10,7 +10,7 @@ export function EditField({
     name,
     label,
 
-    value: initValue = "",
+    value: _value = "",
     setValue: setValueHandler,
     defaultValue = "",
     textArea = false,
@@ -47,9 +47,13 @@ export function EditField({
     column = false,
     hLevel = 6
 }={}) {
-    const [value, _setValue] = useState(initValue);
-    const [prevValue, setPrevValue] = useState(value);
+    const [value, _setValue] = useState(_value);
+    const [prevValue, setPrevValue] = useState(_value);
     const [custom, _setCustom] = useState(initCustom);
+
+    useEffect(() => {
+        _setValue(_value);
+    }, [_value]);
     
     function setValue(v) {
         _setValue(v);
@@ -445,4 +449,22 @@ export function PageField({
             column={column}
         />
     );
+}
+
+// Hack to set the value of a field while still triggering onChange
+export function manualChangeFieldValue(field, newValue) {
+    // This hack is from https://github.com/facebook/react/issues/11488#issuecomment-347775628
+    const lastValue = field.value;
+    field.value = newValue;
+    const event = new Event("input", { bubbles: true });
+
+    // hack React15
+    event.simulated = true;
+
+    // hack React16
+    const tracker = field._valueTracker;
+    if (tracker) {
+        tracker.setValue(lastValue);
+    }
+    field.dispatchEvent(event);
 }

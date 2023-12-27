@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import { combineClassNames } from "src/lib/Misc";
+import { manualChangeFieldValue } from "src/lib/Form";
 
 export function MarkdownLink({ node, href, children, ...props }={}) {
     return (
@@ -42,24 +43,6 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}
 export function MarkdownEditorButtons({ elementRef, show: initShow, className, ...props }={}) {
     const [show, setShow] = useState(initShow);
 
-    function manualOnChange(newValue) {
-        // This hack is from https://github.com/facebook/react/issues/11488#issuecomment-347775628
-        const field = elementRef.current;
-        const lastValue = field.value;
-        field.value = newValue;
-        const event = new Event("input", { bubbles: true });
-
-        // hack React15
-        event.simulated = true;
-
-        // hack React16
-        const tracker = field._valueTracker;
-        if (tracker) {
-            tracker.setValue(lastValue);
-        }
-        field.dispatchEvent(event);
-    }
-
     function wrapSelection(before="", after="", defaultValue=null) {
         const field = elementRef.current;
 
@@ -74,13 +57,15 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
 
 
         if (!selection && defaultValue) {
-            field.value = manualOnChange(value.substring(0, start)  + defaultValue  + value.substring(end));
+            // It needs to be done this way so tha onChange is triggered correctly
+            manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
         } else {
             before = before.replaceAll("$SELECTION", selection);
             after = after.replaceAll("$SELECTION", selection);
             const replacement = `${before}${selection}${after}`;
-
-            manualOnChange(value.substring(0, start) + replacement + value.substring(end));
+            
+            // It needs to be done this way so tha onChange is triggered correctly
+            manualChangeFieldValue(field, value.substring(0, start) + replacement + value.substring(end));
         }
 
         field.selectionStart = start + before.length;

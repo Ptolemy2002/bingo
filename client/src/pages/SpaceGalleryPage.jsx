@@ -438,7 +438,7 @@ export function SpaceGalleryPage({
                         Last Page
                     </BootstrapButton>
                 </div>
-                
+
                 <PageField
                     page={page}
                     pageCount={pageCount}
