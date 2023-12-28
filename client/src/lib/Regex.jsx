@@ -21,7 +21,7 @@ export function combineFlags(...flags) {
 
 export function escapeRegex(value, flags = "") {
     if (typeof value === 'string') {
-        return new RegExp(value.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
+        return new RegExp(value.replaceAll(/[.*+?^${}()|[\]\\]/g, '$&'), flags);
     } else if (value instanceof RegExp) {
         return escapeRegex(value.source, combineFlags(value.flags, flags));
     } else {
