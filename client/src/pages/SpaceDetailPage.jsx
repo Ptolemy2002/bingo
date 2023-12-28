@@ -430,6 +430,9 @@ export function SpaceDetailEdit({
             />
 
             <h2>Tags</h2>
+            <p>
+                Must be consisting of only alphanumeric characters and dashes.
+            </p>
             <FieldList
                 list={tags}
                 setList={setTags}

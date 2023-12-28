@@ -1,7 +1,7 @@
 import React from "react";
 import { useApi } from "src/lib/Api";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { Spacer, listInPlainEnglish, useMountEffect, cleanString } from "src/lib/Misc";
+import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
 import BootstrapButton, { BootstrapButtonLink } from "src/lib/Bootstrap/Button";
@@ -11,6 +11,7 @@ import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import BootstrapModal from "src/lib/Bootstrap/Modal";
 import MarkdownRenderer from "src/lib/Markdown";
 import { PageField } from "src/lib/Form";
+import { cleanString } from "src/lib/Regex";
 
 const searchCategories = [
     {

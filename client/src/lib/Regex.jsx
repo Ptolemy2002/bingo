@@ -11,7 +11,7 @@ export function combineFlags(...flags) {
     flags.forEach((flag) => {
         if (flag) {
             flag.split("").forEach((c) => {
-                result.add(c);
+                if (!result.has(c)) result.add(c);
             });
         }
     });
@@ -39,6 +39,17 @@ export function regexAccentInsensitive(value, flags = "") {
         return regexAccentInsensitive(value.source, combineFlags(value.flags, flags));
     } else {
         throw new TypeError("Expected string or RegExp, got " + typeof value);
+    }
+}
+
+export function removeAccents(value) {
+    if (typeof value === 'string') {
+        accentPatterns.forEach((pattern) => {
+            value = value.replaceAll(new RegExp(pattern, "g"), pattern[1]);
+        });
+        return value;
+    } else {
+        throw new TypeError("Expected string, got " + typeof value);
     }
 }
 
@@ -70,4 +81,8 @@ export function transformRegex(value, args) {
     if (args.caseInsensitive) value = regexCaseInsensitive(value);
     if (args.matchWhole) value = regexMatchWhole(value);
     return value;
+}
+
+export function cleanString(str) {
+    return removeAccents(str).toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
 }

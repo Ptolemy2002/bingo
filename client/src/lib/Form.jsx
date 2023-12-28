@@ -5,7 +5,7 @@ import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
 import { useForceRerender } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
 import { nanoid } from "nanoid";
-import { cleanString } from "src/lib/Misc";
+import { cleanString } from "src/lib/Regex";
 
 export function EditField({
     name,
@@ -57,6 +57,10 @@ export function EditField({
     }, [_value]);
     
     function setValue(v) {
+        if (!custom && !list?.some(item => item === v || (typeof item === "object" && item.value === v))) {
+            v = defaultValue;
+        }
+
         _setValue(v);
         if (setValueHandler && !manualSave) setValueHandler(v);
     }
@@ -88,6 +92,12 @@ export function EditField({
     function onChange(event) {
         if (!validate(event.target.value)) return;
         setValue(event.target.value);
+    }
+
+    function handleKeyUp(event) {
+        if (manualSave && event.key === "Enter") {
+            if (setValueHandler) setValueHandler(value);
+        }
     }
 
     const optionsElement = (
@@ -146,9 +156,10 @@ export function EditField({
                                     ref={fieldRef}
                                     placeholder={placeholder}
                                     className="form-control mb-1"
-                                    value={value}
+                                    value={value || ""}
                                     onChange={onChange}
                                     name={name}
+                                    onKeyUp={handleKeyUp}
                                 />
                             </div>
                         ):
@@ -156,12 +167,12 @@ export function EditField({
                         column ? (
                             <div className="form-column">
                                 {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
-                                <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
+                                <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} />
                             </div>
                         ):
                         // Else
                         (    
-                            <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
+                            <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} />
                         )
                     }
 
@@ -188,7 +199,7 @@ export function EditField({
             const choices = list.map((item, i) => {
                 if (typeof item === "object") {
                     return (
-                        <option key={"option-" + i} value={item.value}>{item.label || item.value}</option>
+                        <option key={"option-" + i} value={item.value || i}>{item.label || item.value}</option>
                     );
                 } else {
                     return (
@@ -232,139 +243,36 @@ export function EditField({
     }
 }
 
-export function CustomStringField({
-    name,
-    label,
-
-    value = "",
-    setValue: setValueHandler,
-    defaultValue = "",
-    textArea = false,
-
-    placeholder = "Enter a value",
-
-    validate: _validate,
-
-    manualSave = false,
-    saveText = "Save",
-    fieldRef = null,
-
-    className = null,
-    column = false,
-    hLevel = 6
-}={}) {
+export function CustomStringField(props={}) {
     return (
         <EditField
-            name={name}
-            label={label}
-            value={value}
-            setValue={setValueHandler}
-            defaultValue={defaultValue}
-            textArea={textArea}
+            {...props}
             custom={true}
             staticCustom={true}
-            placeholder={placeholder}
-            validate={_validate}
-            manualSave={manualSave}
-            saveText={saveText}
-            fieldRef={fieldRef}
-            className={className}
-            column={column}
-            hLevel={hLevel}
         />
     );
 }
 
-export function CustomNumberField({
-    name,
-    label,
-
-    value = "",
-    setValue: setValueHandler,
-    defaultValue = "",
-    textArea = false,
-
-    placeholder = "Enter a value",
-
-    integer = false,
-    min = null,
-    max = null,
-    validate: _validate,
-
-    manualSave = false,
-    saveText = "Save",
-    fieldRef = null,
-
-    className = null,
-    column = false,
-    hLevel = 6
-}={}) {
+export function CustomNumberField(props={}) {
     return (
         <EditField
-            name={name}
-            label={label}
-            value={value}
-            setValue={setValueHandler}
-            defaultValue={defaultValue}
-            textArea={textArea}
+            {...props}
             custom={true}
             staticCustom={true}
-            placeholder={placeholder}
             number={true}
-            integer={integer}
-            min={min}
-            max={max}
-            validate={_validate}
-            manualSave={manualSave}
-            saveText={saveText}
-            fieldRef={fieldRef}
-            className={className}
-            column={column}
-            hLevel={hLevel}
         />
     );
 }
 
 export function EditFieldWithFilter({
-    name,
     label,
-
+    hLevel = 6,
+    custom = false,
+    list = [],
+    className = null,
     value = "",
     setValue: setValueHandler,
-    defaultValue = "",
-    textArea = false,
-
-    custom = true,
-    staticCustom = true,
-    placeholder = "Enter a value",
-
-    number = false,
-    integer = false,
-    min = null,
-    max = null,
-    validate: _validate,
-
-    existingMessage = "Use Existing",
-    customMessage = "Use Custom",
-
-    list = [],
-    listStatus = {
-        inProgress: false,
-        completed: false,
-        failed: false,
-    },
-    refreshHandler = () => {},
-    refreshMessage = "Refresh",
-    inProgressMessage = "Loading...",
-    failedMessage = "Failed.",
-
-    manualSave = false,
-    saveText = "Save",
-    fieldRef = null,
-
-    className = null,
-    column = false,
-    hLevel = 6
+    ...props
 }={}) {
     const [filter, setFilter] = useState("");
 
@@ -410,10 +318,6 @@ export function EditFieldWithFilter({
         );
     }
 
-    if (filteredList && !filteredList.some(item => itemMatches(item, value))) {
-        setValueHandler(list ? list[0] || "" : "");
-    }
-
     const HTag = "h" + hLevel;
 
     return (
@@ -437,32 +341,13 @@ export function EditFieldWithFilter({
             }
 
             <EditField
-                name={name}
+                {...props}
+                list={filteredList}
+                label={label}
+                custom={custom}
+                hLevel={hLevel}
                 value={value}
                 setValue={setValueHandler}
-                defaultValue={defaultValue}
-                textArea={textArea}
-                custom={custom}
-                staticCustom={staticCustom}
-                placeholder={placeholder}
-                number={number}
-                integer={integer}
-                min={min}
-                max={max}
-                validate={_validate}
-                existingMessage={existingMessage}
-                customMessage={customMessage}
-                list={filteredList}
-                listStatus={listStatus}
-                refreshHandler={refreshHandler}
-                refreshMessage={refreshMessage}
-                inProgressMessage={inProgressMessage}
-                failedMessage={failedMessage}
-                manualSave={manualSave}
-                saveText={saveText}
-                fieldRef={fieldRef}
-                column={column}
-                hLevel={hLevel}
             />
         </div>
     );

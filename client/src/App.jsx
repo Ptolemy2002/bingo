@@ -12,7 +12,7 @@ export default function App() {
 
     return (
         <Router>
-            <Header title="Cocktail Bar" />
+            <Header title="Bingo App" />
             <main className="flex-grow-1">
                 <Routes>
                     {routeElements}
