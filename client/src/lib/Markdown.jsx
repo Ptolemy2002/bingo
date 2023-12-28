@@ -43,7 +43,7 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}
 export function MarkdownEditorButtons({ elementRef, show: initShow, className, ...props }={}) {
     const [show, setShow] = useState(initShow);
 
-    function wrapSelection(before="", after="", defaultValue=null) {
+    function wrapSelection(before="", after="", defaultValue=null, defaultSelectionOffset=[0, 0]) {
         const field = elementRef.current;
 
         if (!field) return;
@@ -52,13 +52,13 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
         const end = field.selectionEnd;
 
         const value = field.value;
-
         const selection = value.substring(start, end);
 
 
         if (!selection && defaultValue) {
             // It needs to be done this way so tha onChange is triggered correctly
             manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
+            field.setSelectionRange(start + defaultSelectionOffset[0], end + defaultValue.length + defaultSelectionOffset[1]);
         } else {
             before = before.replaceAll("$SELECTION", selection);
             after = after.replaceAll("$SELECTION", selection);
@@ -66,10 +66,9 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
             
             // It needs to be done this way so tha onChange is triggered correctly
             manualChangeFieldValue(field, value.substring(0, start) + replacement + value.substring(end));
+            field.setSelectionRange(start + before.length, end + before.length);
         }
 
-        field.selectionStart = start + before.length;
-        field.selectionEnd = end + before.length;
         field.focus();
     }
 
@@ -87,7 +86,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("**", "**", "**bold text**")}
+                    onClick={() => wrapSelection("**", "**", "**bold text**", [2, -2])}
                 >
                     Bold
                 </BootstrapButton>
@@ -95,7 +94,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("_", "_", "_italic text_")}
+                    onClick={() => wrapSelection("_", "_", "_italic text_", [1, -1])}
                 >
                     Italic
                 </BootstrapButton>
@@ -103,7 +102,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("~", "~", "~strikethrough text~")}
+                    onClick={() => wrapSelection("~", "~", "~strikethrough text~", [1, -1])}
                 >
                     Strikethrough
                 </BootstrapButton>
@@ -111,7 +110,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("$", "$", "$x^2$")}
+                    onClick={() => wrapSelection("$", "$", "$x^2$", [1, -1])}
                 >
                     Math
                 </BootstrapButton>
@@ -119,7 +118,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("[", "](https://google.com)", "[Link Text](https://google.com)")}
+                    onClick={() => wrapSelection("[", "](https://google.com)", "[Link Text](https://google.com)", [1, -21])}
                 >
                     Link
                 </BootstrapButton>

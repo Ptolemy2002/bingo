@@ -5,6 +5,7 @@ import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
 import { useForceRerender } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
 import { nanoid } from "nanoid";
+import { cleanString } from "src/lib/Misc";
 
 export function EditField({
     name,
@@ -136,11 +137,11 @@ export function EditField({
         return (
             <div className={combineClassNames("form-group mb-1", className)}>
                 <div className="form-row">
-                    {name && !textArea && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                    {label && !textArea && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                     {
                         textArea ? (
                             <div className="form-column">
-                                {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                                 <textarea
                                     ref={fieldRef}
                                     placeholder={placeholder}
@@ -154,7 +155,7 @@ export function EditField({
                         // Else If
                         column ? (
                             <div className="form-column">
-                                {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                                 <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value} onChange={onChange} name={name} />
                             </div>
                         ):
@@ -185,9 +186,15 @@ export function EditField({
             );
         } else {
             const choices = list.map((item, i) => {
-                return (
-                    <option key={"option-" + i} value={item}>{item}</option>
-                );
+                if (typeof item === "object") {
+                    return (
+                        <option key={"option-" + i} value={item.value}>{item.label || item.value}</option>
+                    );
+                } else {
+                    return (
+                        <option key={"option-" + i} value={item}>{item}</option>
+                    );
+                }
             });
 
             const HTag = "h" + hLevel;
@@ -195,12 +202,12 @@ export function EditField({
             return (
                 <div className={combineClassNames("form-group mb-1", className)}>
                     <div className="form-row">
-                        {name && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                        {label && !column ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
 
                         {
                             column ? (
                                 <div className="form-column">
-                                    {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                    {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                                     <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
                                         {choices}
                                     </select>
@@ -210,7 +217,7 @@ export function EditField({
                             // Else
                             (
                                 <div className="form-column">
-                                    {name ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
+                                    {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
                                     <select ref={fieldRef} className="form-control mb-1" value={value} onChange={onChange} name={name}>
                                         {choices}
                                     </select>
@@ -229,7 +236,7 @@ export function CustomStringField({
     name,
     label,
 
-    value: initValue = "",
+    value = "",
     setValue: setValueHandler,
     defaultValue = "",
     textArea = false,
@@ -243,13 +250,14 @@ export function CustomStringField({
     fieldRef = null,
 
     className = null,
-    column = false
+    column = false,
+    hLevel = 6
 }={}) {
     return (
         <EditField
             name={name}
             label={label}
-            value={initValue}
+            value={value}
             setValue={setValueHandler}
             defaultValue={defaultValue}
             textArea={textArea}
@@ -262,6 +270,7 @@ export function CustomStringField({
             fieldRef={fieldRef}
             className={className}
             column={column}
+            hLevel={hLevel}
         />
     );
 }
@@ -270,7 +279,7 @@ export function CustomNumberField({
     name,
     label,
 
-    value: initValue = "",
+    value = "",
     setValue: setValueHandler,
     defaultValue = "",
     textArea = false,
@@ -287,13 +296,14 @@ export function CustomNumberField({
     fieldRef = null,
 
     className = null,
-    column = false
+    column = false,
+    hLevel = 6
 }={}) {
     return (
         <EditField
             name={name}
             label={label}
-            value={initValue}
+            value={value}
             setValue={setValueHandler}
             defaultValue={defaultValue}
             textArea={textArea}
@@ -310,7 +320,151 @@ export function CustomNumberField({
             fieldRef={fieldRef}
             className={className}
             column={column}
+            hLevel={hLevel}
         />
+    );
+}
+
+export function EditFieldWithFilter({
+    name,
+    label,
+
+    value = "",
+    setValue: setValueHandler,
+    defaultValue = "",
+    textArea = false,
+
+    custom = true,
+    staticCustom = true,
+    placeholder = "Enter a value",
+
+    number = false,
+    integer = false,
+    min = null,
+    max = null,
+    validate: _validate,
+
+    existingMessage = "Use Existing",
+    customMessage = "Use Custom",
+
+    list = [],
+    listStatus = {
+        inProgress: false,
+        completed: false,
+        failed: false,
+    },
+    refreshHandler = () => {},
+    refreshMessage = "Refresh",
+    inProgressMessage = "Loading...",
+    failedMessage = "Failed.",
+
+    manualSave = false,
+    saveText = "Save",
+    fieldRef = null,
+
+    className = null,
+    column = false,
+    hLevel = 6
+}={}) {
+    const [filter, setFilter] = useState("");
+
+    function itemMatches(item, v) {
+        v = cleanString(v);
+
+        if (typeof item === "object") {
+            if (item.matches) {
+                return item.matches(v);
+            } else if (item.label) {
+                return cleanString(item.label).includes(v);
+            } else {
+                return cleanString(item.value).includes(v);
+            }
+        } else {
+            return cleanString(item).includes(v);
+        }
+    }
+
+    const filteredList = list?.filter(item => itemMatches(item, filter));
+
+    if (filteredList && filteredList.length === 0) {
+        return (
+            <div className={combineClassNames("filter-select-field", className)}>
+                {label ? <h6>{label}</h6> : null}
+                <CustomStringField
+                    name="choice-filter"
+                    label="Choice Filter"
+                    value={filter}
+                    setValue={setFilter}
+                    defaultValue={filter}
+                    placeholder="Enter a filter"
+                    manualSave={true}
+                    saveText="Apply"
+                    hLevel={hLevel}
+                />
+
+                <BootstrapAlert type="info" allowDismiss={false}>
+                    <BootstrapAlert.Heading>No Matches</BootstrapAlert.Heading>
+                    <p>No matches found.</p>
+                </BootstrapAlert>
+            </div>
+        );
+    }
+
+    if (filteredList && !filteredList.some(item => itemMatches(item, value))) {
+        setValueHandler(list ? list[0] || "" : "");
+    }
+
+    const HTag = "h" + hLevel;
+
+    return (
+        <div className={combineClassNames("filter-select-field", className)}>
+            {label ? <HTag>{label}</HTag> : null}
+
+            {
+                custom ? null : (
+                    <CustomStringField
+                        name="choice-filter"
+                        label="Choice Filter"
+                        value={filter}
+                        setValue={setFilter}
+                        defaultValue={filter}
+                        placeholder="Enter a filter"
+                        manualSave={true}
+                        saveText="Apply"
+                        hLevel={hLevel}
+                    />
+                )
+            }
+
+            <EditField
+                name={name}
+                value={value}
+                setValue={setValueHandler}
+                defaultValue={defaultValue}
+                textArea={textArea}
+                custom={custom}
+                staticCustom={staticCustom}
+                placeholder={placeholder}
+                number={number}
+                integer={integer}
+                min={min}
+                max={max}
+                validate={_validate}
+                existingMessage={existingMessage}
+                customMessage={customMessage}
+                list={filteredList}
+                listStatus={listStatus}
+                refreshHandler={refreshHandler}
+                refreshMessage={refreshMessage}
+                inProgressMessage={inProgressMessage}
+                failedMessage={failedMessage}
+                manualSave={manualSave}
+                saveText={saveText}
+                fieldRef={fieldRef}
+                column={column}
+                hLevel={hLevel}
+            />
+        </div>
     );
 }
 
@@ -319,7 +473,7 @@ export function FieldList({
     setList: setListHandler,
     types: initTypeList = [],
     typeMap = {},
-    defaultValue = ""
+    maxLength = null
 }={}) {
     const listRef = useRef(initList);
     const keysListRef = useRef(initList.map(() => nanoid()));
@@ -396,10 +550,16 @@ export function FieldList({
     });
 
     const addButtons = types.map((type, i) => {
-        const {label} = typeMap[type];
+        const {label, defaultValue} = typeMap[type];
 
         return (
-            <BootstrapButton key={"add-button-" + type} type="secondary" outline={true} onClick={() => add(type, defaultValue)}>
+            <BootstrapButton
+                key={"add-button-" + type}
+                type="secondary"
+                outline={true}
+                onClick={() => add(type, defaultValue || "")}
+                disabled={maxLength && listRef.current.length >= maxLength}
+            >
                 Add "{label}"
             </BootstrapButton>
         );

@@ -1,7 +1,7 @@
 import React from "react";
 import { useApi } from "src/lib/Api";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
-import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
+import { Spacer, listInPlainEnglish, useMountEffect, cleanString } from "src/lib/Misc";
 import SearchBar from "src/lib/SearchBar";
 import { useQuery } from "src/lib/Browser";
 import BootstrapButton, { BootstrapButtonLink } from "src/lib/Bootstrap/Button";
@@ -141,10 +141,6 @@ export function SpaceGalleryPage({
     }
 
     const [spaceNames, spaceNamesStatus, sendSpaceNamesRequest] = useApi(queryPath, true, (a, b) => {
-        function cleanString(str) {
-            return str.toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
-        }
-
         if (a.type === "search-result" && b.type === "search-result") {
             if (Math.abs(a._score - b._score) > Number.EPSILON) {
                 return b._score - a._score;

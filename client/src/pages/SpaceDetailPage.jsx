@@ -7,7 +7,7 @@ import BootstrapButton from "src/lib/Bootstrap/Button";
 import MarkdownRenderer, { MarkdownEditorButtons } from "src/lib/Markdown";
 import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
-import { CustomStringField, EditField, FieldList } from "src/lib/Form";
+import { CustomStringField, FieldList, EditFieldWithFilter } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
 
@@ -155,7 +155,7 @@ export function SpaceDetailPage({ name, editMode: initEditMode=false }={}) {
                     <div className="SpaceDetailPage container">
                         <h1>{spaceData.name}</h1>
                         {
-                            spaceData.isDirty(["push", "pull"]) && !spaceData.pushFailed ? (
+                            spaceData.isDirty(["push", "pull"]) && !spaceData.pushFailed && !spaceData.hasInProgressRequest() ? (
                                 <BootstrapAlert type="warning" allowDismiss={true}>
                                     <BootstrapAlert.Heading>Unpublished Changes</BootstrapAlert.Heading>
                                     <p>
@@ -437,6 +437,7 @@ export function SpaceDetailEdit({
                 typeMap={{
                     string: {
                         label: "Tag",
+                        defaultValue: tagList ? tagList[0] : "",
                         elementFn: (props) => {
                             return (
                                 <TagField
@@ -449,7 +450,6 @@ export function SpaceDetailEdit({
                         }
                     }
                 }}
-                defaultValue={tagList ? tagList[0] : ""}
             />
 
             <h2>Options</h2>
@@ -600,7 +600,7 @@ export function TagField({
 }={}) {
     return (
         <div className="tag-field">
-            <EditField
+            <EditFieldWithFilter
                 name={"tag-" + index}
                 label={"Tag " + (index + 1)}
 

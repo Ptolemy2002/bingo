@@ -64,3 +64,7 @@ export function Spacer({ size = "1rem", horizontal = false }={}) {
     return <div className="spacer" style={{ [keyName]: size }} />;
 }
 
+export function cleanString(str) {
+    return str.toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
+}
+
