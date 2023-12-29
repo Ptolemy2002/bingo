@@ -4,7 +4,7 @@ import { BingoSpaceDataProvider, useBingoSpaceData, useBingoSpaceDataContext } f
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import NotFoundPage from "./NotFoundPage";
 import BootstrapButton from "src/lib/Bootstrap/Button";
-import MarkdownRenderer, { MarkdownEditorButtons } from "src/lib/Markdown";
+import MarkdownRenderer, { MarkdownEditorButtons, MarkdownKeyboardShortcuts } from "src/lib/Markdown";
 import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import { CustomStringField, FieldList, EditFieldWithFilter } from "src/lib/Form";
@@ -397,6 +397,8 @@ export function SpaceDetailEdit({
                 setValue={setDescription}
                 placeholder="Enter a description"
                 textArea={true}
+
+                keyboardShortcuts={MarkdownKeyboardShortcuts}
             />
 
             <MarkdownEditorButtons

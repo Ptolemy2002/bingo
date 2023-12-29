@@ -46,7 +46,8 @@ export function EditField({
 
     className = null,
     column = false,
-    hLevel = 6
+    hLevel = 6,
+    keyboardShortcuts = []
 }={}) {
     const [value, _setValue] = useState(_value);
     const [prevValue, setPrevValue] = useState(_value);
@@ -98,6 +99,17 @@ export function EditField({
         if (manualSave && event.key === "Enter") {
             if (setValueHandler) setValueHandler(value);
         }
+    }
+
+    function handleKeyDown(event) {
+        let handled = false;
+        keyboardShortcuts.forEach(({modifiers=[], key="", fn=() => {}}) => {
+            if (!handled && modifiers.every(modifier => event[modifier + "Key"]) && event.key === key) {
+                event.preventDefault();
+                fn(event);
+                handled = true;
+            }
+        });
     }
 
     const optionsElement = (
@@ -160,6 +172,7 @@ export function EditField({
                                     onChange={onChange}
                                     name={name}
                                     onKeyUp={handleKeyUp}
+                                    onKeyDown={handleKeyDown}
                                 />
                             </div>
                         ):
@@ -167,12 +180,12 @@ export function EditField({
                         column ? (
                             <div className="form-column">
                                 {label ? <label htmlFor={name}><HTag>{label}</HTag></label> : null}
-                                <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} />
+                                <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} onKeyDown={handleKeyDown} />
                             </div>
                         ):
                         // Else
                         (    
-                            <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} />
+                            <input ref={fieldRef} type="text" placeholder={placeholder} className="form-control mb-1" value={value || ""} onChange={onChange} name={name} onKeyUp={handleKeyUp} onKeyDown={handleKeyDown} />
                         )
                     }
 
@@ -525,4 +538,31 @@ export function manualChangeFieldValue(field, newValue) {
         tracker.setValue(lastValue);
     }
     field.dispatchEvent(event);
+}
+
+export function wrapSelection(field, before="", after="", defaultValue=null, defaultSelectionOffset=[0, 0]) {
+    if (!field) return;
+
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+
+    const value = field.value;
+    const selection = value.substring(start, end);
+
+
+    if (!selection && defaultValue) {
+        // It needs to be done this way so tha onChange is triggered correctly
+        manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
+        field.setSelectionRange(start + defaultSelectionOffset[0], end + defaultValue.length + defaultSelectionOffset[1]);
+    } else {
+        before = before.replaceAll("$SELECTION", selection);
+        after = after.replaceAll("$SELECTION", selection);
+        const replacement = `${before}${selection}${after}`;
+        
+        // It needs to be done this way so tha onChange is triggered correctly
+        manualChangeFieldValue(field, value.substring(0, start) + replacement + value.substring(end));
+        field.setSelectionRange(start + before.length, end + before.length);
+    }
+
+    field.focus();
 }

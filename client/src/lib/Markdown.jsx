@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import { combineClassNames, clamp } from "src/lib/Misc";
-import { manualChangeFieldValue } from "src/lib/Form";
+import { wrapSelection } from "src/lib/Form";
 
 export function MarkdownLink({ node, href, children, ...props }={}) {
     return (
@@ -44,35 +44,6 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}
 export function MarkdownEditorButtons({ elementRef, show: initShow, className, ...props }={}) {
     const [show, setShow] = useState(initShow);
 
-    function wrapSelection(before="", after="", defaultValue=null, defaultSelectionOffset=[0, 0]) {
-        const field = elementRef.current;
-
-        if (!field) return;
-
-        const start = field.selectionStart;
-        const end = field.selectionEnd;
-
-        const value = field.value;
-        const selection = value.substring(start, end);
-
-
-        if (!selection && defaultValue) {
-            // It needs to be done this way so tha onChange is triggered correctly
-            manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
-            field.setSelectionRange(start + defaultSelectionOffset[0], end + defaultValue.length + defaultSelectionOffset[1]);
-        } else {
-            before = before.replaceAll("$SELECTION", selection);
-            after = after.replaceAll("$SELECTION", selection);
-            const replacement = `${before}${selection}${after}`;
-            
-            // It needs to be done this way so tha onChange is triggered correctly
-            manualChangeFieldValue(field, value.substring(0, start) + replacement + value.substring(end));
-            field.setSelectionRange(start + before.length, end + before.length);
-        }
-
-        field.focus();
-    }
-
     if (show) {
         return (
             <div className={combineClassNames("markdown-editor-btns", className)} {...props}>
@@ -87,7 +58,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("**", "**", "**bold text**", [2, -2])}
+                    onClick={() => wrapSelection(elementRef.current, "**", "**", "**bold text**", [2, -2])}
                 >
                     Bold
                 </BootstrapButton>
@@ -95,7 +66,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("_", "_", "_italic text_", [1, -1])}
+                    onClick={() => wrapSelection(elementRef.current.current, "_", "_", "_italic text_", [1, -1])}
                 >
                     Italic
                 </BootstrapButton>
@@ -103,7 +74,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("~", "~", "~strikethrough text~", [1, -1])}
+                    onClick={() => wrapSelection(elementRef.current.current, "~", "~", "~strikethrough text~", [1, -1])}
                 >
                     Strikethrough
                 </BootstrapButton>
@@ -111,7 +82,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("$", "$", "$x^2$", [1, -1])}
+                    onClick={() => wrapSelection(elementRef.current, "$", "$", "$x^2$", [1, -1])}
                 >
                     Math
                 </BootstrapButton>
@@ -119,7 +90,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection("[", "](https://google.com)", "[Link Text](https://google.com)", [1, -21])}
+                    onClick={() => wrapSelection(elementRef.current, "[", "](https://google.com)", "[Link Text](https://google.com)", [1, -21])}
                 >
                     Link
                 </BootstrapButton>
@@ -139,3 +110,45 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
         );
     }
 }
+
+export const MarkdownKeyboardShortcuts = [
+    {
+        modifiers: ["ctrl"],
+        key: "b",
+        fn: (e) => {
+            wrapSelection(e.target, "**", "**", "**bold text**", [2, -2]);
+        }
+    },
+
+    {
+        modifiers: ["ctrl"],
+        key: "i",
+        fn: (e) => {
+            wrapSelection(e.target, "_", "_", "_italic text_", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: ["ctrl"],
+        key: "s",
+        fn: (e) => {
+            wrapSelection(e.target, "~", "~", "~strikethrough text~", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: ["ctrl"],
+        key: "m",
+        fn: (e) => {
+            wrapSelection(e.target, "$", "$", "$x^2$", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: ["ctrl"],
+        key: "l",
+        fn: (e) => {
+            wrapSelection(e.target, "[", "](https://google.com)", "[Link Text](https://google.com)", [1, -21]);
+        }
+    }
+]
