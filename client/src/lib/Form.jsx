@@ -594,12 +594,12 @@ export function insertAtCursorEnd(field, text) {
 export function removeAtCursorStart(field, length) {
     if (!field) return;
 
-    const [selection,,, beforeSelection, afterSelection] = fieldSelection(field);
+    const [selection, start, end, beforeSelection, afterSelection] = fieldSelection(field);
     const replacement = `${beforeSelection.substring(0, beforeSelection.length - length)}${selection}${afterSelection}`
 
     // It needs to be done this way so tha onChange is triggered correctly
     manualChangeFieldValue(field, replacement);
-    field.setSelectionRange(beforeSelection.length - length, beforeSelection.length - length);
+    field.setSelectionRange(start - length, end - length);
 
     field.focus();
 }
@@ -607,18 +607,18 @@ export function removeAtCursorStart(field, length) {
 export function removeAtCursorEnd(field, length) {
     if (!field) return;
 
-    const [selection,,, beforeSelection, afterSelection] = fieldSelection(field);
+    const [selection, start, end, beforeSelection, afterSelection] = fieldSelection(field);
     let replacement
     if (selection.length === 0) {
         replacement = `${beforeSelection.substring(0, beforeSelection.length - length)}${afterSelection}`
         // It needs to be done this way so tha onChange is triggered correctly
         manualChangeFieldValue(field, replacement);
-        field.setSelectionRange(beforeSelection.length - length, beforeSelection.length - length);
+        field.setSelectionRange(start - length, end - length);
     } else {
         replacement = `${beforeSelection}${selection.substring(0, selection.length - length)}${afterSelection}`
         // It needs to be done this way so tha onChange is triggered correctly
         manualChangeFieldValue(field, replacement);
-        field.setSelectionRange(beforeSelection.length, beforeSelection.length);
+        field.setSelectionRange(start, end - length);
     }
 
     field.focus();
@@ -647,6 +647,37 @@ export const TabShortcuts = [
             } else {
                 event.preventDefault();
                 removeAtCursorEnd(event.target, clamp(selection.length, 1));
+            }
+        }
+    },
+
+    // Navigate past entire tabs at once
+    {
+        modifiers: [null],
+        key: "ArrowLeft",
+        fn: (event) => {
+            const [,start, end, beforeSelection] = fieldSelection(event.target);
+            if (beforeSelection.endsWith("    ")) {
+                event.preventDefault();
+                event.target.setSelectionRange(start - 4, end - 4);
+            } else if (start > 0) {
+                event.preventDefault();
+                event.target.setSelectionRange(start - 1, end - 1);
+            }
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "ArrowRight",
+        fn: (event) => {
+            const [,start, end,, afterSelection] = fieldSelection(event.target);
+            if (afterSelection.startsWith("    ")) {
+                event.preventDefault();
+                event.target.setSelectionRange(start + 4, end + 4);
+            } else {
+                event.preventDefault();
+                event.target.setSelectionRange(start + 1, end + 1);
             }
         }
     }
