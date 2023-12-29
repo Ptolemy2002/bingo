@@ -135,335 +135,6 @@ export class Data {
     }
 
     push(onSuccess, onFailure) {
-        throw new Error("Not implemented.");
-    }
-
-    pull(onSuccess, onFailure) {
-        throw new Error("Not implemented.");
-    }
-
-    duplicate(onSuccess, onFailure) {
-        throw new Error("Not implemented.");
-    }
-
-    delete(onSuccess, onFailure) {
-        throw new Error("Not implemented.");
-    }
-
-    hasLastRequest(type) {
-        if (type === undefined) return this.lastRequest !== null;
-        return this.lastRequest === type;
-    }
-
-    hasInProgressRequest(type) {
-        return this.requestInProgress && this.hasLastRequest(type);
-    }
-
-    hasFailedRequest(type) {
-        return this.requestFailed && this.hasLastRequest(type);
-    }
-
-    hasSuccessfulRequest(type) {
-        return !this.requestFailed && this.hasLastRequest(type);
-    }
-
-}
-
-export class BingoBoardData extends Data {
-    id = null;
-    name = "Unknown Board";
-    width = 5;
-    height = 5;
-    spaceNames = [];
-    markedMask = 0n;
-
-    get spaces() {
-        const result = [];
-        for (let i = 0; i < this.height * this.width; i++) {
-            result.push(this.getSpace(i));
-        }
-        return result;
-    }
-
-    get rows() {
-        const result = [];
-        for (let i = 0; i < this.height; i++) {
-            const row = [];
-            for (let j = 0; j < this.width; j++) {
-                row.push(this.getSpace(i, j));
-            }
-            result.push(row);
-        }
-        return result;
-    }
-
-    get columns() {
-        const result = [];
-        for (let i = 0; i < this.width; i++) {
-            const column = [];
-            for (let j = 0; j < this.height; j++) {
-                column.push(this.getSpace(j, i));
-            }
-            result.push(column);
-        }
-        return result;
-    }
-
-    static createFromID(id, _push, _pull, _duplicate, _delete) {
-        const result = new BingoBoardData();
-        result.id = id;
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    static createFromJSON(boardState, _push, _pull, _duplicate, _delete) {
-        const result = new BingoBoardData();
-        result.fromJSON(boardState).checkpoint();
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    toJSON() {
-        return {
-            _id: this.id,
-            name: this.name,
-            width: this.width,
-            height: this.height,
-            spaceNames: this.spaceNames.slice(),
-            markedMask: this.markedMask.toString(),
-        };
-    }
-
-    fromJSON(boardState) {
-        if (boardState.hasOwnProperty("_id")) this.id = boardState._id;
-        if (boardState.hasOwnProperty("name")) this.name = boardState.name;
-        if (boardState.hasOwnProperty("width")) this.width = boardState.width;
-        if (boardState.hasOwnProperty("height")) this.height = boardState.height;
-        if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
-        if (boardState.hasOwnProperty("markedMask")) this.markedMask = BigInt(boardState.markedMask);
-    }
-
-    jsonEquals(boardState) {
-        boardState = boardState || {};
-        if (boardState.hasOwnProperty("_id") && boardState._id !== this.id) return false;
-        if (boardState.hasOwnProperty("name") && boardState.name !== this.name) return false;
-        if (boardState.hasOwnProperty("width") && boardState.width !== this.width) return false;
-        if (boardState.hasOwnProperty("height") && boardState.height !== this.height) return false;
-        if (boardState.hasOwnProperty("spaceNames") && !listsEqual(boardState.spaceNames, this.spaceNames)) return false;
-        if (boardState.hasOwnProperty("markedMask") && boardState.markedMask !== this.markedMask.toString()) return false;
-
-        return true;
-    }
-
-    clone() {
-        return BingoBoardData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
-    }
-
-    validateIndex(i, wrap = false) {
-        if (wrap) {
-            return this.wrapIndex(i);
-        } else if (i < 0 || i >= this.height * this.width) {
-            throw new RangeError("Index out of range. Use the wrap argument to handle this error by wrapping around the board.");
-        }
-
-        return i;
-    }
-
-    validateRow(row, wrap = false) {
-        if (wrap) {
-            return this.wrapRow(row);
-        } else if (row < 0 || row >= this.height) {
-            throw new RangeError("Row out of range. Use the wrap argument to handle this error by wrapping around the board.");
-        }
-
-        return row;
-    }
-
-    validateCol(col, wrap = false) {
-        if (wrap) {
-            return this.wrapCol(col);
-        } else if (col < 0 || col >= this.width) {
-            throw new RangeError("Column out of range. Use the wrap argument to handle this error by wrapping around the board.");
-        }
-
-        return col;
-    }
-
-    wrapIndex(index) {
-        return wrapNumber(index, 0, this.height * this.width - 1);
-    }
-
-    wrapRow(row) {
-        return wrapNumber(row, 0, this.height - 1);
-    }
-
-    wrapCol(col) {
-        return wrapNumber(col, 0, this.width - 1);
-    }
-
-    coordinatesToIndex(row, col, wrap = false) {
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-        return row * this.width + col;
-    }
-
-    indexToCoordinates(index, wrap = false) {
-        index = this.validateIndex(index, wrap);
-        return [Math.floor(index / this.width), index % this.width];
-    }
-
-    getSpaceName({row, col, index, wrap = false}={}) {
-        if (index) return this.spaceNames[this.validateIndex(index, wrap)];
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        return this.spaceNames[this.coordinatesToIndex(row, col)];
-    }
-
-    setSpaceName({row, col, index, value, wrap = false}={}) {
-        if (index) {
-            this.spaceNames[this.validateIndex(index, wrap)] = value;
-            return this;
-        }
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        this.spaceNames[this.coordinatesToIndex(row, col)] = value;
-        return this;
-    }
-
-    getSpaceMarked({row, col, index, wrap = false}={}) {
-        if (index) return isBitOn(this.markedMask, this.validateIndex(index, wrap));
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        return isBitOn(this.markedMask, this.coordinatesToIndex(row, col));
-    }
-
-    setSpaceMarked({row, col, index, value, wrap = false}={}) {
-        if (index) {
-            this.markedMask = setBit(this.markedMask, this.validateIndex(index, wrap), value);
-            return this;
-        }
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        this.markedMask = setBit(this.markedMask, this.coordinatesToIndex(row, col), value);
-        return this;
-    }
-
-    toggleSpaceMarked({row, col, index, wrap = false}={}) {
-        if (index) {
-            this.setSpaceMarked({index, value: !this.getSpaceMarked({index, wrap})});
-            return this;
-        }
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        this.setSpaceMarked({row, col, value: !this.getSpaceMarked({row, col, wrap})});
-        return this;
-    }
-
-    getSpace({row, col, index, wrap = false}={}) {
-        if (index) {
-            return {
-                name: this.getSpaceName({index, wrap}),
-                setName: (value) => this.setSpaceName({index, value, wrap}),
-                marked: this.getSpaceMarked({index, wrap}),
-                setMarked: (value) => this.setSpaceMarked({index, value, wrap}),
-            };
-        }
-
-        row = this.validateRow(row, wrap);
-        col = this.validateCol(col, wrap);
-
-        return {
-            name: this.getSpaceName({row, col, wrap}),
-            setName: (value) => this.setSpaceName({row, col, value, wrap}),
-            marked: this.getSpaceMarked({row, col, wrap}),
-            setMarked: (value) => this.setSpaceMarked({row, col, value, wrap}),
-        };
-    }
-}
-
-export class BingoSpaceData extends Data {
-    id = null;
-    name = "Unknown Space";
-    description = null;
-    examples = [];
-    aliases = [];
-    tags = [];
-
-    static createFromID(id, _push, _pull, _duplicate, _delete) {
-        const result = new BingoSpaceData();
-        result.id = id;
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    static createFromJSON(spaceState, _push, _pull, _duplicate, _delete) {
-        const result = new BingoSpaceData();
-        result.fromJSON(spaceState).checkpoint();
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    toJSON() {
-        return {
-            _id: this.id,
-            name: this.name,
-            description: this.description,
-            examples: this.examples.slice(),
-            aliases: this.aliases.slice(),
-            tags: this.tags.slice(),
-        };
-    }
-
-    fromJSON(spaceState) {
-        if (spaceState.hasOwnProperty("_id")) this.id = spaceState._id;
-        if (spaceState.hasOwnProperty("name")) this.name = spaceState.name;
-        if (spaceState.hasOwnProperty("description")) this.description = spaceState.description;
-        if (spaceState.hasOwnProperty("examples")) this.examples = spaceState.examples.slice();
-        if (spaceState.hasOwnProperty("aliases")) this.aliases = spaceState.aliases.slice();
-        if (spaceState.hasOwnProperty("tags")) this.tags = spaceState.tags.slice();
-
-        return this;
-    }
-
-    jsonEquals(spaceState) {
-        spaceState = spaceState || {};
-        if (spaceState.hasOwnProperty("_id") && spaceState._id !== this.id) return false;
-        if (spaceState.hasOwnProperty("name") && spaceState.name !== this.name) return false;
-        if (spaceState.hasOwnProperty("description") && spaceState.description !== this.description) return false;
-        if (spaceState.hasOwnProperty("examples") && !listsEqual(spaceState.examples, this.examples)) return false;
-        if (spaceState.hasOwnProperty("aliases") && !listsEqual(spaceState.aliases, this.aliases)) return false;
-        if (spaceState.hasOwnProperty("tags") && !listsEqual(spaceState.tags, this.tags)) return false;
-
-        return true;
-    }
-
-    clone() {
-        return BingoSpaceData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
-    }
-
-    push(onSuccess, onFailure) {
         if (!this._push) throw new TypeError("Push function not set.");
         if (this.requestInProgress) {
             if (this.lastRequest === "push") {
@@ -617,6 +288,334 @@ export class BingoSpaceData extends Data {
 
         return this;
     }
+
+    hasLastRequest(type) {
+        if (type === undefined) return this.lastRequest !== null;
+        return this.lastRequest === type;
+    }
+
+    hasInProgressRequest(type) {
+        return this.requestInProgress && this.hasLastRequest(type);
+    }
+
+    hasFailedRequest(type) {
+        return this.requestFailed && this.hasLastRequest(type);
+    }
+
+    hasSuccessfulRequest(type) {
+        return !this.requestFailed && this.hasLastRequest(type);
+    }
+
+}
+
+export class BingoBoardData extends Data {
+    id = null;
+    name = "Unknown Board";
+    width = 5;
+    height = 5;
+    spaceNames = [];
+    markedMask = 0n;
+
+    get spaces() {
+        const result = [];
+        for (let i = 0; i < this.height * this.width; i++) {
+            result.push(this.getSpace(i));
+        }
+        return result;
+    }
+
+    get rows() {
+        const result = [];
+        for (let i = 0; i < this.height; i++) {
+            const row = [];
+            for (let j = 0; j < this.width; j++) {
+                row.push(this.getSpace(i, j));
+            }
+            result.push(row);
+        }
+        return result;
+    }
+
+    get columns() {
+        const result = [];
+        for (let i = 0; i < this.width; i++) {
+            const column = [];
+            for (let j = 0; j < this.height; j++) {
+                column.push(this.getSpace(j, i));
+            }
+            result.push(column);
+        }
+        return result;
+    }
+
+    fillEmptySpaces(nameFn = (i) => `Space ${i + 1}`) {
+        if (this.spaceNames.length < this.height * this.width) {
+            for (let i = this.spaceNames.length; i < this.height * this.width; i++) {
+                this.spaceNames.push(nameFn(i));
+            }
+        }
+        return this;
+    }
+
+    static createFromID(id, _push, _pull, _duplicate, _delete) {
+        const result = new BingoBoardData();
+        result.id = id;
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    static createFromJSON(boardState, _push, _pull, _duplicate, _delete) {
+        const result = new BingoBoardData();
+        result.fromJSON(boardState).checkpoint();
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    toJSON() {
+        return {
+            _id: this.id,
+            name: this.name,
+            width: this.width,
+            height: this.height,
+            spaceNames: this.spaceNames.slice(),
+            markedMask: this.markedMask.toString(),
+        };
+    }
+
+    fromJSON(boardState) {
+        if (boardState.hasOwnProperty("_id")) this.id = boardState._id;
+        if (boardState.hasOwnProperty("name")) this.name = boardState.name;
+        if (boardState.hasOwnProperty("width")) this.width = boardState.width;
+        if (boardState.hasOwnProperty("height")) this.height = boardState.height;
+        if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
+        if (boardState.hasOwnProperty("markedMask")) this.markedMask = BigInt(boardState.markedMask);
+
+        return this;
+    }
+
+    jsonEquals(boardState) {
+        boardState = boardState || {};
+        if (boardState.hasOwnProperty("_id") && boardState._id !== this.id) return false;
+        if (boardState.hasOwnProperty("name") && boardState.name !== this.name) return false;
+        if (boardState.hasOwnProperty("width") && boardState.width !== this.width) return false;
+        if (boardState.hasOwnProperty("height") && boardState.height !== this.height) return false;
+        if (boardState.hasOwnProperty("spaceNames") && !listsEqual(boardState.spaceNames, this.spaceNames)) return false;
+        if (boardState.hasOwnProperty("markedMask") && boardState.markedMask !== this.markedMask.toString()) return false;
+
+        return true;
+    }
+
+    clone() {
+        return BingoBoardData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
+    }
+
+    validateIndex(i, wrap = false) {
+        if (wrap) {
+            return this.wrapIndex(i);
+        } else if (i < 0 || i >= this.height * this.width) {
+            throw new RangeError("Index out of range. Use the wrap argument to handle this error by wrapping around the board.");
+        }
+
+        return i;
+    }
+
+    validateRow(row, wrap = false) {
+        if (wrap) {
+            return this.wrapRow(row);
+        } else if (row < 0 || row >= this.height) {
+            throw new RangeError("Row out of range. Use the wrap argument to handle this error by wrapping around the board.");
+        }
+
+        return row;
+    }
+
+    validateCol(col, wrap = false) {
+        if (wrap) {
+            return this.wrapCol(col);
+        } else if (col < 0 || col >= this.width) {
+            throw new RangeError("Column out of range. Use the wrap argument to handle this error by wrapping around the board.");
+        }
+
+        return col;
+    }
+
+    wrapIndex(index) {
+        return wrapNumber(index, 0, this.height * this.width - 1);
+    }
+
+    wrapRow(row) {
+        return wrapNumber(row, 0, this.height - 1);
+    }
+
+    wrapCol(col) {
+        return wrapNumber(col, 0, this.width - 1);
+    }
+
+    coordinatesToIndex(row, col, wrap = false) {
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+        return row * this.width + col;
+    }
+
+    indexToCoordinates(index, wrap = false) {
+        index = this.validateIndex(index, wrap);
+        return [Math.floor(index / this.width), index % this.width];
+    }
+
+    hasExactCenter() {
+        return this.width % 2 === 1 && this.height % 2 === 1;
+    }
+
+    getSpaceName({row, col, index, wrap = false}={}) {
+        if (index) return this.spaceNames[this.validateIndex(index, wrap)];
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        return this.spaceNames[this.coordinatesToIndex(row, col)];
+    }
+
+    setSpaceName({row, col, index, value, wrap = false}={}) {
+        if (index) {
+            this.spaceNames[this.validateIndex(index, wrap)] = value;
+            return this;
+        }
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        this.spaceNames[this.coordinatesToIndex(row, col)] = value;
+        return this;
+    }
+
+    getSpaceMarked({row, col, index, wrap = false}={}) {
+        if (index) return isBitOn(this.markedMask, this.validateIndex(index, wrap));
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        return isBitOn(this.markedMask, this.coordinatesToIndex(row, col));
+    }
+
+    setSpaceMarked({row, col, index, value, wrap = false}={}) {
+        if (index) {
+            this.markedMask = setBit(this.markedMask, this.validateIndex(index, wrap), value);
+            return this;
+        }
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        this.markedMask = setBit(this.markedMask, this.coordinatesToIndex(row, col), value);
+        return this;
+    }
+
+    toggleSpaceMarked({row, col, index, wrap = false}={}) {
+        if (index) {
+            this.setSpaceMarked({index, value: !this.getSpaceMarked({index, wrap})});
+            return this;
+        }
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        this.setSpaceMarked({row, col, value: !this.getSpaceMarked({row, col, wrap})});
+        return this;
+    }
+
+    getSpace({row, col, index, wrap = false}={}) {
+        if (index) {
+            return {
+                name: this.getSpaceName({index, wrap}),
+                setName: (value) => this.setSpaceName({index, value, wrap}),
+                marked: this.getSpaceMarked({index, wrap}),
+                setMarked: (value) => this.setSpaceMarked({index, value, wrap}),
+            };
+        }
+
+        row = this.validateRow(row, wrap);
+        col = this.validateCol(col, wrap);
+
+        return {
+            name: this.getSpaceName({row, col, wrap}),
+            setName: (value) => this.setSpaceName({row, col, value, wrap}),
+            marked: this.getSpaceMarked({row, col, wrap}),
+            setMarked: (value) => this.setSpaceMarked({row, col, value, wrap}),
+        };
+    }
+}
+
+export class BingoSpaceData extends Data {
+    id = null;
+    name = "Unknown Space";
+    description = null;
+    examples = [];
+    aliases = [];
+    tags = [];
+
+    static createFromID(id, _push, _pull, _duplicate, _delete) {
+        const result = new BingoSpaceData();
+        result.id = id;
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    static createFromJSON(spaceState, _push, _pull, _duplicate, _delete) {
+        const result = new BingoSpaceData();
+        result.fromJSON(spaceState).checkpoint();
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    toJSON() {
+        return {
+            _id: this.id,
+            name: this.name,
+            description: this.description,
+            examples: this.examples.slice(),
+            aliases: this.aliases.slice(),
+            tags: this.tags.slice(),
+        };
+    }
+
+    fromJSON(spaceState) {
+        if (spaceState.hasOwnProperty("_id")) this.id = spaceState._id;
+        if (spaceState.hasOwnProperty("name")) this.name = spaceState.name;
+        if (spaceState.hasOwnProperty("description")) this.description = spaceState.description;
+        if (spaceState.hasOwnProperty("examples")) this.examples = spaceState.examples.slice();
+        if (spaceState.hasOwnProperty("aliases")) this.aliases = spaceState.aliases.slice();
+        if (spaceState.hasOwnProperty("tags")) this.tags = spaceState.tags.slice();
+
+        return this;
+    }
+
+    jsonEquals(spaceState) {
+        spaceState = spaceState || {};
+        if (spaceState.hasOwnProperty("_id") && spaceState._id !== this.id) return false;
+        if (spaceState.hasOwnProperty("name") && spaceState.name !== this.name) return false;
+        if (spaceState.hasOwnProperty("description") && spaceState.description !== this.description) return false;
+        if (spaceState.hasOwnProperty("examples") && !listsEqual(spaceState.examples, this.examples)) return false;
+        if (spaceState.hasOwnProperty("aliases") && !listsEqual(spaceState.aliases, this.aliases)) return false;
+        if (spaceState.hasOwnProperty("tags") && !listsEqual(spaceState.tags, this.tags)) return false;
+
+        return true;
+    }
+
+    clone() {
+        return BingoSpaceData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
+    }
 }
 
 export function useBingoSpaceData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
@@ -648,7 +647,7 @@ export const BingoSpaceContext = createContext(undefined);
 export function useBingoSpaceDataContext() {
     const context = useContext(BingoSpaceContext);
     if (context === undefined) {
-        throw new Error("No BingoSpaceContext provider found.");
+        throw new Error("No BingoSpaceData provider found.");
     }
     return context;
 }
@@ -670,7 +669,7 @@ function BingoSpaceDataProviderUse({
     primaryKey = "name",
     children
 }={}) {
-    const spaceData = useBingoSpaceData(value, primaryKey);
+    const spaceData = useBingoSpaceData(value, { primaryKey });
     return (
         <BingoSpaceDataProviderData value={spaceData}>
             {children}
