@@ -74,7 +74,7 @@ export function MarkdownEditorButtons({ elementRef, show: initShow, className, .
                 <BootstrapButton
                     type="secondary"
                     outline={true}
-                    onClick={() => wrapSelection(elementRef.current.current, "~", "~", "~strikethrough text~", [1, -1])}
+                    onClick={() => wrapSelection(elementRef.current, "~", "~", "~strikethrough text~", [1, -1])}
                 >
                     Strikethrough
                 </BootstrapButton>
