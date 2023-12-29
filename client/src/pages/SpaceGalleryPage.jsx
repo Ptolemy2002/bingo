@@ -463,7 +463,14 @@ export function SpaceGalleryPage({
                             onClick={deleteAll}
                             disabled={deleteStatus.started && (!deleteStatus.completed && !deleteStatus.failed)}
                         >
-                            Do It
+                            {
+                                deleteStatus.started && !deleteStatus.completed ?
+                                    "Deleting...":
+                                deleteStatus.started && deleteStatus.failed ?
+                                    "Failed to Delete":
+                                // Else
+                                    "Do It"
+                            }
                         </BootstrapButton>
                     </BootstrapModal.Footer>
                 </BootstrapModal>
