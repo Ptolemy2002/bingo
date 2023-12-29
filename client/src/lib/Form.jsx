@@ -12,6 +12,7 @@ export function EditField({
     label,
 
     value: _value = "",
+    convertValue = (v) => v,
     setValue: setValueHandler,
     defaultValue = "",
     textArea = false,
@@ -57,9 +58,12 @@ export function EditField({
         _setValue(_value);
     }, [_value]);
     
-    function setValue(v) {
+    function setValue(v, convert = true) {
         if (!custom && !list?.some(item => item === v || (typeof item === "object" && item.value === v))) {
             v = defaultValue;
+            _setValue(v);
+        } else if (convert) {
+            v = convertValue(v);
         }
 
         _setValue(v);
@@ -70,7 +74,7 @@ export function EditField({
         _setCustom(v);
         if (v) {
             setPrevValue(value);
-            setValue(defaultValue);
+            setValue(defaultValue, false);
         } else {
             setValue(prevValue);
         }
@@ -87,7 +91,7 @@ export function EditField({
             if (!isNullOrUndefined(max) && v > max) return false;
         }
 
-        return _validate ? _validate(v) : true;
+        return _validate ? _validate(convertValue(v)) : true;
     }
 
     function onChange(event) {
@@ -500,6 +504,7 @@ export function PageField({
             {...props}
             value={page}
             setValue={setPageHandler}
+            convertValue={(v) => parseInt(v)}
             placeholder="Enter a page number"
             number={true}
             integer={true}
@@ -708,6 +713,33 @@ export const AutoBracketShortcuts = [
         fn: (event) => {
             event.preventDefault();
             wrapSelection(event.target, "{", "}", "{}", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "\"",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "\"", "\"", "\"\"", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "'",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "'", "'", "''", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "`",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "`", "`", "``", [1, -1]);
         }
     }
 ];
