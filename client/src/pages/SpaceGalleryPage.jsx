@@ -12,6 +12,7 @@ import BootstrapModal from "src/lib/Bootstrap/Modal";
 import MarkdownRenderer from "src/lib/Markdown";
 import { PageField } from "src/lib/Form";
 import { cleanString } from "src/lib/Regex";
+import { combineClassNames } from "src/lib/Misc";
 
 const searchCategories = [
     {
@@ -531,7 +532,16 @@ export function SpaceCard({ name }={}) {
                         {tagsElements}
                         <Spacer />
                         <b>Desription:</b> <br />
-                        <MarkdownRenderer baseHLevel={6}>
+                        <MarkdownRenderer
+                            baseHLevel={6}
+                            components={{
+                                p: ({className, node, ...props}) => {
+                                    return (
+                                        <p {...props} className={combineClassNames(className, "mb-1")}/>
+                                    );
+                                }
+                            }}
+                        >
                             {description}
                         </MarkdownRenderer>
 

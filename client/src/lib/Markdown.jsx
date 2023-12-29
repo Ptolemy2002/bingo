@@ -14,7 +14,7 @@ export function MarkdownLink({ node, href, children, ...props }={}) {
     );
 }
 
-export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}) {
+export default function MarkdownRenderer({ baseHLevel=1, children, components, ...props }={}) {
     const hLevelOverride = {};
     baseHLevel = clamp(baseHLevel, 1, 6);
 
@@ -33,7 +33,8 @@ export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}
             rehypePlugins={[rehypeKatex]}
             components={{
                 a: MarkdownLink,
-                ...hLevelOverride
+                ...hLevelOverride,
+                ...components
             }}
         >
             {children}

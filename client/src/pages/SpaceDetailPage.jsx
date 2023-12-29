@@ -5,7 +5,7 @@ import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import NotFoundPage from "./NotFoundPage";
 import BootstrapButton from "src/lib/Bootstrap/Button";
 import MarkdownRenderer, { MarkdownEditorButtons, MarkdownKeyboardShortcuts } from "src/lib/Markdown";
-import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
+import { Spacer, combineClassNames, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import { CustomStringField, FieldList, EditFieldWithFilter, TabShortcuts } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
@@ -278,7 +278,16 @@ export function SpaceDetailDisplay() {
             {tagsElements}
 
             <h4>Description</h4>
-            <MarkdownRenderer baseHLevel={5}>
+            <MarkdownRenderer
+                baseHLevel={5}
+                components={{
+                    p: ({className, node, ...props}) => {
+                        return (
+                            <p {...props} className={combineClassNames(className, "mb-1")}/>
+                        );
+                    }
+                }}
+            >
                 {data.description || "No description provided."}
             </MarkdownRenderer>
 
@@ -414,7 +423,16 @@ export function SpaceDetailEdit({
                 description ? (
                     <div className="markdown-preview">
                         <h6>Markdown Preview</h6>
-                        <MarkdownRenderer baseHLevel={6}>
+                        <MarkdownRenderer
+                            baseHLevel={6}
+                            components={{
+                                p: ({className, node, ...props}) => {
+                                    return (
+                                        <p {...props} className={combineClassNames(className, "mb-1")}/>
+                                    );
+                                }
+                            }}
+                        >
                             {description}
                         </MarkdownRenderer>
                     </div>
