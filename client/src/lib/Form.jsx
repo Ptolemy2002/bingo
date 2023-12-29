@@ -47,7 +47,7 @@ export function EditField({
     className = null,
     column = false,
     hLevel = 6,
-    keyboardShortcuts = []
+    keyboardShortcuts = BasicShortcuts
 }={}) {
     const [value, _setValue] = useState(_value);
     const [prevValue, setPrevValue] = useState(_value);
@@ -104,7 +104,7 @@ export function EditField({
     function handleKeyDown(event) {
         let handled = false;
         keyboardShortcuts.forEach(({modifiers=[], key="", fn=() => {}}) => {
-            if (!handled && modifiers.every(modifier => event[modifier + "Key"]) && event.key === key) {
+            if (!handled && modifiers.every(modifier => !modifier || event[modifier + "Key"]) && event.key === key) {
                 event.preventDefault();
                 fn(event);
                 handled = true;
@@ -490,24 +490,16 @@ export function FieldList({
 }
 
 export function PageField({
-    name,
-    label,
-
     page=1,
     setPage: setPageHandler,
     pageCount=1,
-
-    fieldRef = null,
-    className = null,
-    column = false
+    ...props
 }={}) {
     return (
         <EditField
-            name={name}
-            label={label}
+            {...props}
             value={page}
             setValue={setPageHandler}
-            defaultValue={page}
             placeholder="Enter a page number"
             number={true}
             integer={true}
@@ -515,9 +507,6 @@ export function PageField({
             max={pageCount}
             manualSave={true}
             saveText="Go"
-            fieldRef={fieldRef}
-            className={className}
-            column={column}
         />
     );
 }
@@ -540,27 +529,154 @@ export function manualChangeFieldValue(field, newValue) {
     field.dispatchEvent(event);
 }
 
-export function wrapSelection(field, before="", after="", defaultValue=null, defaultSelectionOffset=[0, 0]) {
-    if (!field) return;
+export function fieldSelection(field) {
+    if (!field) return ["", 0, 0, "", ""];
 
     const start = field.selectionStart;
     const end = field.selectionEnd;
 
-    const value = field.value;
-    const selection = value.substring(start, end);
+    return [field.value.substring(start, end), start, end, field.value.substring(0, start), field.value.substring(end)];
+}
 
+export function wrapSelection(field, before="", after="", defaultValue=null, defaultSelectionOffset=[0, 0]) {
+    if (!field) return;
 
+    const [selection, start, end, beforeSelection, afterSelection] = fieldSelection(field);
     if (!selection && defaultValue) {
-        // It needs to be done this way so tha onChange is triggered correctly
-        manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
+        // It needs to be done this way so that onChange is triggered correctly
+        manualChangeFieldValue(field, beforeSelection  + defaultValue  + afterSelection);
         field.setSelectionRange(start + defaultSelectionOffset[0], end + defaultValue.length + defaultSelectionOffset[1]);
     } else {
         const replacement = `${before}${selection}${after}`;
         
-        // It needs to be done this way so tha onChange is triggered correctly
-        manualChangeFieldValue(field, value.substring(0, start) + replacement + value.substring(end));
+        // It needs to be done this way so that onChange is triggered correctly
+        manualChangeFieldValue(field, beforeSelection + replacement + afterSelection);
         field.setSelectionRange(start + before.length, end + before.length);
     }
 
     field.focus();
 }
+
+export function replaceSelection(field, replacement, selectionOffset=[0, 0]) {
+    if (!field) return;
+
+    const [, start, end, beforeSelection, afterSelection] = fieldSelection(field);
+    
+    // It needs to be done this way so that onChange is triggered correctly
+    manualChangeFieldValue(field, beforeSelection + replacement + afterSelection);
+    field.setSelectionRange(start + selectionOffset[0], end + selectionOffset[1]);
+
+    field.focus();
+}
+
+export function insertAtCursorStart(field, text) {
+    if (!field) return;
+
+    const [selection] = fieldSelection(field);
+    const replacement = `${text}${selection}`
+    
+    replaceSelection(field, replacement, [text.length, text.length + selection.length]);
+    
+    field.focus();
+}
+
+export function insertAtCursorEnd(field, text) {
+    if (!field) return;
+
+    const [selection] = fieldSelection(field);
+    const replacement = `${selection}${text}`
+    
+    replaceSelection(field, replacement, [selection.length, selection.length + text.length]);
+    
+    field.focus();
+}
+
+export function removeAtCursorStart(field, length) {
+    if (!field) return;
+
+    const [selection,,, beforeSelection, afterSelection] = fieldSelection(field);
+    const replacement = `${beforeSelection.substring(0, beforeSelection.length - length)}${selection}${afterSelection}`
+
+    // It needs to be done this way so tha onChange is triggered correctly
+    manualChangeFieldValue(field, replacement);
+    field.setSelectionRange(beforeSelection.length - length, beforeSelection.length - length);
+
+    field.focus();
+}
+
+export function removeAtCursorEnd(field, length) {
+    if (!field) return;
+
+    const [selection,,, beforeSelection, afterSelection] = fieldSelection(field);
+    let replacement
+    if (selection.length === 0) {
+        replacement = `${beforeSelection.substring(0, beforeSelection.length - length)}${afterSelection}`
+        // It needs to be done this way so tha onChange is triggered correctly
+        manualChangeFieldValue(field, replacement);
+        field.setSelectionRange(beforeSelection.length - length, beforeSelection.length - length);
+    } else {
+        replacement = `${beforeSelection}${selection.substring(0, selection.length - length)}${afterSelection}`
+        // It needs to be done this way so tha onChange is triggered correctly
+        manualChangeFieldValue(field, replacement);
+        field.setSelectionRange(beforeSelection.length, beforeSelection.length);
+    }
+
+    field.focus();
+}
+
+export const BasicShortcuts = [
+    // Insert 4 spaces on tab instead of switching focus
+    {
+        modifiers: [null],
+        key: "Tab",
+        fn: (event) => {
+            event.preventDefault();
+            insertAtCursorStart(event.target, "    ");
+        }
+    },
+
+    // Remove entire tabs at once
+    {
+        modifiers: [null],
+        key: "Backspace",
+        fn: (event) => {
+            const [selection,,, beforeSelection] = fieldSelection(event.target);
+            if (selection.length === 0 && beforeSelection.endsWith("    ")) {
+                event.preventDefault();
+                removeAtCursorStart(event.target, 4);
+            } else {
+                event.preventDefault();
+                removeAtCursorEnd(event.target, clamp(selection.length, 1));
+            }
+        }
+    }
+];
+
+export const AutoBracketShortcuts = [
+    {
+        modifiers: [null],
+        key: "(",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "(", ")", "()", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "[",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "[", "]", "[]", [1, -1]);
+        }
+    },
+
+    {
+        modifiers: [null],
+        key: "{",
+        fn: (event) => {
+            event.preventDefault();
+            wrapSelection(event.target, "{", "}", "{}", [1, -1]);
+        }
+    }
+];

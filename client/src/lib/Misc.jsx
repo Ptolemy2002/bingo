@@ -65,5 +65,7 @@ export function Spacer({ size = "1rem", horizontal = false }={}) {
 }
 
 export function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
+    if (!isNullOrUndefined(min) && value < min) return min;
+    if (!isNullOrUndefined(max) && value > max) return max;
+    return value;
 }

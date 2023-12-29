@@ -7,7 +7,7 @@ import BootstrapButton from "src/lib/Bootstrap/Button";
 import MarkdownRenderer, { MarkdownEditorButtons, MarkdownKeyboardShortcuts } from "src/lib/Markdown";
 import { Spacer, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapBadge from "src/lib/Bootstrap/Badge";
-import { CustomStringField, FieldList, EditFieldWithFilter } from "src/lib/Form";
+import { CustomStringField, FieldList, EditFieldWithFilter, BasicShortcuts } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
 
@@ -398,7 +398,10 @@ export function SpaceDetailEdit({
                 placeholder="Enter a description"
                 textArea={true}
 
-                keyboardShortcuts={MarkdownKeyboardShortcuts}
+                keyboardShortcuts={[
+                    ...MarkdownKeyboardShortcuts,
+                    ...BasicShortcuts
+                ]}
             />
 
             <MarkdownEditorButtons
