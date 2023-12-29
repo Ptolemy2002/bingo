@@ -47,7 +47,7 @@ export function EditField({
     className = null,
     column = false,
     hLevel = 6,
-    keyboardShortcuts = BasicShortcuts
+    keyboardShortcuts = []
 }={}) {
     const [value, _setValue] = useState(_value);
     const [prevValue, setPrevValue] = useState(_value);
@@ -624,7 +624,7 @@ export function removeAtCursorEnd(field, length) {
     field.focus();
 }
 
-export const BasicShortcuts = [
+export const TabShortcuts = [
     // Insert 4 spaces on tab instead of switching focus
     {
         modifiers: [null],
