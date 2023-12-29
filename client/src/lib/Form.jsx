@@ -555,8 +555,8 @@ export function wrapSelection(field, before="", after="", defaultValue=null, def
         manualChangeFieldValue(field, value.substring(0, start)  + defaultValue  + value.substring(end));
         field.setSelectionRange(start + defaultSelectionOffset[0], end + defaultValue.length + defaultSelectionOffset[1]);
     } else {
-        before = before.replaceAll(/(?<=(^|[^\\])(\\{2})*)\$SELECTION/g, () => selection).replaceAll("\\\\", "\\");
-        after = after.replaceAll(/(?<=(^|[^\\])(\\{2})*)\$SELECTION/g, () => selection).replaceAll("\\\\", "\\");
+        before = before.replaceAll(/(?<=(^|[^\\])(\\{2})*)\$SELECTION/g, () => selection).replaceAll("\\\\", "\\").replaceAll("\\$", "$");
+        after = after.replaceAll(/(?<=(^|[^\\])(\\{2})*)\$SELECTION/g, () => selection).replaceAll("\\\\", "\\").replaceAll("\\$", "$");
         const replacement = `${before}${selection}${after}`;
         
         // It needs to be done this way so tha onChange is triggered correctly
