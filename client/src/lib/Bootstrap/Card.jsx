@@ -1,5 +1,5 @@
 import React from "react";
-import { combineClassNames } from "src/lib/Misc";
+import { combineClassNames, clamp } from "src/lib/Misc";
 
 export default function BootstrapCard({
     className = null,
@@ -47,8 +47,7 @@ export function BootstrapCardTitle({
         className: combineClassNames(className, "card-title")
     };
 
-    // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${hLevel}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${clamp(hLevel, 1, 6)}`;
     return (
         <HTag {...newProps}>
             {children}
@@ -67,8 +66,7 @@ export function BootstapCardSubtitle({
         className: combineClassNames(className, "card-subtitle"),
     };
 
-    // For some reason, eslint doesn't recognize that HTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${hLevel}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${clamp(hLevel, 1, 6)}`;
     return (
         <HTag {...newProps}>
             {children}

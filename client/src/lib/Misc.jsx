@@ -64,3 +64,6 @@ export function Spacer({ size = "1rem", horizontal = false }={}) {
     return <div className="spacer" style={{ [keyName]: size }} />;
 }
 
+export function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}

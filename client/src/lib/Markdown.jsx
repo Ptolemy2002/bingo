@@ -5,7 +5,7 @@ import BootstrapButton from "./Bootstrap/Button";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import { combineClassNames } from "src/lib/Misc";
+import { combineClassNames, clamp } from "src/lib/Misc";
 import { manualChangeFieldValue } from "src/lib/Form";
 
 export function MarkdownLink({ node, href, children, ...props }={}) {
@@ -16,6 +16,7 @@ export function MarkdownLink({ node, href, children, ...props }={}) {
 
 export default function MarkdownRenderer({ baseHLevel=1, children, ...props }={}) {
     const hLevelOverride = {};
+    baseHLevel = clamp(baseHLevel, 1, 6);
 
     for (let i = 1; i <= 6; i++) {
         if (i + baseHLevel - 1 > 6) {

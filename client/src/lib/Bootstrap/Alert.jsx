@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { combineClassNames, useMountEffect } from "src/lib/Misc";
+import { combineClassNames, useMountEffect, clamp } from "src/lib/Misc";
 import { Link } from "react-router-dom";
 
 export default function BootstrapAlert({
@@ -63,8 +63,7 @@ export function BootstrapAlertHeading({
         className: combineClassNames(className, "alert-heading")
     };
 
-    // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
-    const HTag = `h${hLevel || 4}`; //eslint-disable-line no-unused-vars
+    const HTag = `h${clamp(hLevel, 1, 6)}`;
     return (
         <HTag {...newProps}>
             {children}

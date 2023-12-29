@@ -1,4 +1,4 @@
-import { combineClassNames } from "src/lib/Misc";
+import { combineClassNames, clamp } from "src/lib/Misc";
 import BootstrapButton from "src/lib/Bootstrap/Button";
 
 export default function BootstrapModal({
@@ -43,7 +43,7 @@ export function BootstrapModalHeader({
         )
     };
 
-    const HTag = `h${hLevel}`
+    const HTag = `h${clamp(hLevel, 1, 6)}`;
     return (
         <div {...newProps}>
             <HTag className="modal-title">

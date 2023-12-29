@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import BootstrapAlert from "src/lib/Bootstrap/Alert";
 import {combineClassNames, isNullOrUndefined } from "src/lib/Misc";
 import { listPush, listSet, listSwap, listRemove } from "src/lib/List";
-import { useForceRerender } from "src/lib/Misc";
+import { useForceRerender, clamp } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
 import { nanoid } from "nanoid";
 import { cleanString } from "src/lib/Regex";
@@ -143,7 +143,7 @@ export function EditField({
     );
 
     if (custom) {
-        const HTag = "h" + hLevel;
+        const HTag = "h" + clamp(hLevel, 1, 6);
         return (
             <div className={combineClassNames("form-group mb-1", className)}>
                 <div className="form-row">
@@ -208,7 +208,7 @@ export function EditField({
                 }
             });
 
-            const HTag = "h" + hLevel;
+            const HTag = "h" + clamp(hLevel, 1, 6);
 
             return (
                 <div className={combineClassNames("form-group mb-1", className)}>
@@ -294,10 +294,12 @@ export function EditFieldWithFilter({
 
     const filteredList = list?.filter(item => itemMatches(item, filter));
 
+    const HTag = "h" + clamp(hLevel, 1, 6);
+
     if (filteredList && filteredList.length === 0) {
         return (
             <div className={combineClassNames("filter-select-field", className)}>
-                {label ? <h6>{label}</h6> : null}
+                {label ? <HTag>{label}</HTag> : null}
                 <CustomStringField
                     name="choice-filter"
                     label="Choice Filter"
@@ -307,7 +309,6 @@ export function EditFieldWithFilter({
                     placeholder="Enter a filter"
                     manualSave={true}
                     saveText="Apply"
-                    hLevel={hLevel}
                 />
 
                 <BootstrapAlert type="info" allowDismiss={false}>
@@ -317,8 +318,6 @@ export function EditFieldWithFilter({
             </div>
         );
     }
-
-    const HTag = "h" + hLevel;
 
     return (
         <div className={combineClassNames("filter-select-field", className)}>
@@ -335,7 +334,7 @@ export function EditFieldWithFilter({
                         placeholder="Enter a filter"
                         manualSave={true}
                         saveText="Apply"
-                        hLevel={hLevel}
+                        hLevel={hLevel + 1}
                     />
                 )
             }
@@ -343,9 +342,8 @@ export function EditFieldWithFilter({
             <EditField
                 {...props}
                 list={filteredList}
-                label={label}
                 custom={custom}
-                hLevel={hLevel}
+                hLevel={hLevel + 1}
                 value={value}
                 setValue={setValueHandler}
             />
@@ -358,11 +356,15 @@ export function FieldList({
     setList: setListHandler,
     types: initTypeList = [],
     typeMap = {},
-    maxLength = null
+    maxLength = null,
+    expanded: initExpanded = true,
+    className = null
 }={}) {
     const listRef = useRef(initList);
     const keysListRef = useRef(initList.map(() => nanoid()));
     const typeListRef = useRef(initTypeList);
+
+    const [expanded, setExpanded] = useState(initExpanded);
 
     const forceRerender = useForceRerender();
 
@@ -451,14 +453,25 @@ export function FieldList({
     });
 
     return (
-        <div className="field-list">
-            {elements}
+        <div className={combineClassNames("field-list", className)}>
+            <BootstrapButton
+                type="secondary"
+                outline={true}
+                onClick={() => setExpanded(!expanded)}
+                className={combineClassNames(expanded ? "mb-3" : null)}
+            >
+                {expanded ? "Collapse" : "Expand"}
+            </BootstrapButton>
 
-            <div className="mb-1">
-                <div className="btns-hor">
-                    {addButtons}
-                </div>
-            </div>
+            {expanded ? elements : null}
+
+            {
+                expanded ? (
+                    <div className="btns-hor mb-1">
+                        {addButtons}
+                    </div>
+                ) : null
+            }
         </div>
     );
 }
