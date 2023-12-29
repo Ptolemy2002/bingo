@@ -3,12 +3,19 @@ import { matchRoutes, useLocation } from "react-router-dom";
 import  HomePage from "src/pages/HomePage";
 import SpaceGalleryPage from "src/pages/SpaceGalleryPage";
 import SpaceDetailPage from "src/pages/SpaceDetailPage";
+import BoardPage from "src/pages/BoardPage";
 
 export const routes = [
     {
         path: "/",
         navigationText: "Home",
         element: <HomePage />
+    },
+
+    {
+        path: "/board",
+        navigationText: "My Board",
+        element: <BoardPage />
     },
 
     {

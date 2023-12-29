@@ -6,7 +6,27 @@ export function listsEqual(a, b) {
     for (let i = 0; i < a.length; ++i) {
         if (Array.isArray(a[i]) && Array.isArray(b[i])) {
             if (!listsEqual(a[i], b[i])) return false;
+        } else if (typeof a[i] === "object" && typeof b[i] === "object") {
+            if (!objectsEqual(a[i], b[i])) return false;
         } else if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+export function objectsEqual(a, b) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (Object.keys(a).length !== Object.keys(b).length) return false;
+
+    for (const key in a) {
+        if (Array.isArray(a[key]) && Array.isArray(b[key])) {
+            if (!listsEqual(a[key], b[key])) return false;
+        } else if (typeof a[key] === "object" && typeof b[key] === "object") {
+            if (!objectsEqual(a[key], b[key])) return false;
+        } else if (a[key] !== b[key]) {
             return false;
         }
     }

@@ -69,3 +69,22 @@ export function clamp(value, min, max) {
     if (!isNullOrUndefined(max) && value > max) return max;
     return value;
 }
+
+export function wrapNumber(index, minimum, maximum) {
+    // Calculate the range (maximum - minimum)
+    const range = maximum - minimum;
+  
+    // Adjust the index to be within the range
+    let adjustedIndex = index - minimum;
+  
+    // If the adjusted index is negative, wrap to the end
+    if (adjustedIndex < 0) {
+      adjustedIndex = range + (adjustedIndex % range) + 1;
+    }
+  
+    // Wrap the index to the beginning or end
+    const wrappedIndex = (adjustedIndex % (range + 1)) + minimum;
+  
+    // Return the wrapped index
+    return wrappedIndex;
+}
