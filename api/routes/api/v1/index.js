@@ -6,5 +6,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.use('/spaces', require('./spaces'));
+router.use('/games', require('./games'));
 
 module.exports = router;

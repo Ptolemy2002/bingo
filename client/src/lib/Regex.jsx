@@ -86,3 +86,8 @@ export function transformRegex(value, args) {
 export function cleanString(str) {
     return removeAccents(str).toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
 }
+
+export function toAlphanumeric(str, separator="-") {
+    const words = removeAccents(str).split(" ");
+    return words.map(word => word.replaceAll(/[^a-z0-9_-]/gi, "")).join(separator);
+}

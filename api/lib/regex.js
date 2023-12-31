@@ -29,6 +29,17 @@ function regexAccentInsensitive(value, flags = "") {
     }
 }
 
+function removeAccents(value) {
+    if (typeof value === 'string') {
+        accentPatterns.forEach((pattern) => {
+            value = value.replaceAll(new RegExp(pattern, "g"), pattern[1]);
+        });
+        return value;
+    } else {
+        throw new TypeError("Expected string, got " + typeof value);
+    }
+}
+
 function regexCaseInsensitive(value, flags = "") {
     if (typeof value === 'string') {
         if (!flags.includes("i")) {
@@ -59,10 +70,17 @@ function transformRegex(value, args) {
     return value;
 }
 
+function toAlphanumeric(str, separator="-") {
+    const words = str.split(" ");
+    return words.map(word => word.replaceAll(/[^a-z0-9_-]/gi, "")).join(separator);
+}
+
 module.exports = {
     escapeRegex,
     regexAccentInsensitive,
+    removeAccents,
     regexCaseInsensitive,
     regexMatchWhole,
-    transformRegex
+    transformRegex,
+    toAlphanumeric
 };

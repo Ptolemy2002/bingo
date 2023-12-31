@@ -8,6 +8,7 @@
     "swagger-autogen": "node services/swagger.js"
   },
   "dependencies": {
+    "acebase": "^1.29.5",
     "app-module-path": "^2.2.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "~1.4.4",
