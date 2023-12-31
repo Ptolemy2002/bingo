@@ -2,6 +2,8 @@ require("dotenv").config();
 require("app-module-path").addPath(__dirname);
 
 const createError = require('http-errors');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -16,6 +18,32 @@ const indexRouter = require('routes/index');
 const apiRouter = require('routes/api/v1/index');
 
 const app = express();
+
+// Set up Socket.IO
+const socketServer = createServer(app);
+const socketPort = process.env.SOCKET_PORT || 3000;
+
+const io = new Server(socketServer, {
+    cors: {
+        origin: '*',
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log(`Socket user connected: ${socket.id}`);
+    
+    socket.on('disconnect', () => {
+        console.log(`Socket user disconnected: ${socket.id}`);
+    });
+
+    socket.on('ping', (callback) => {
+        callback('pong');
+    });
+});
+
+socketServer.listen(socketPort, () => {
+    console.log(`Socket.IO server listening on port ${socketPort}`);
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, { useNewUrlParser: true })
@@ -54,4 +82,4 @@ app.use(function(err, req, res, next) {
     res.render('error', {err});
 });
 
-module.exports = app;
+module.exports = {app, io};

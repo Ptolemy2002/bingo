@@ -632,6 +632,7 @@ export function TagField({
 
                 value={value}
                 setValue={setValue}
+                convertValue={(v) => v.toLowerCase().replaceAll(" ", "-")}
                 placeholder="Enter a tag"
                 
                 custom={false}

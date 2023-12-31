@@ -1,0 +1,52 @@
+@import "variables";
+@import "functions";
+
+.bingo-board {
+    max-width: 1000px;
+
+    .col {
+        padding: 0;
+    }
+    
+    .bingo-space {
+        position: relative;
+
+        // Make the cells square
+        aspect-ratio: 1/1;
+
+        border: 1px solid black;
+
+        &.bg-img {
+            background-image: url("placeholder.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        &.bg-solid {
+            background-color: white;
+
+            &.marked {
+                background-color: #00ff00;
+            }
+        }
+
+        // Center the text
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        &.null {
+            background-color: inherit;
+            background-image: none;
+            border: none;
+        }
+    }
+}
+
+.space-edit {
+    display: flex;
+    flex-direction: column;
+}

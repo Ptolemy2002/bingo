@@ -1,6 +1,6 @@
 /* global BigInt */
 
-function asBigInt(value) {
+export function asBigInt(value) {
     if (typeof value === "bigint") {
         return value;
     } else if (typeof value === "number" || typeof value === "string") {
@@ -10,13 +10,13 @@ function asBigInt(value) {
     }
 }
 
-function isBitOn(mask, bit) {
+export function isBitOn(mask, bit) {
     mask = asBigInt(mask);
     bit = asBigInt(bit);
     return (mask & (1n << bit)) !== 0n;
 }
 
-function setBit(mask, bit, value) {
+export function setBit(mask, bit, value) {
     mask = asBigInt(mask);
     bit = asBigInt(bit);
     // Convert the value to a boolean.
@@ -29,10 +29,8 @@ function setBit(mask, bit, value) {
     }
 }
 
-function toggleBit(mask, bit) {
+export function toggleBit(mask, bit) {
     mask = asBigInt(mask);
     bit = asBigInt(bit);
     return mask ^ (1n << bit);
 }
-
-export { isBitOn, setBit, toggleBit };

@@ -1,10 +1,8 @@
-/* global BigInt */
-
 import { useMountEffect, wrapNumber } from "src/lib/Misc";
 import { listsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
-import { isBitOn, setBit } from "./Bitwise";
+import { isBitOn, setBit, asBigInt } from "src/lib/Bitwise";
 
 export class Data {
     lastRequest = null;
@@ -319,7 +317,7 @@ export class BingoBoardData extends Data {
     get spaces() {
         const result = [];
         for (let i = 0; i < this.height * this.width; i++) {
-            result.push(this.getSpace(i));
+            result.push(this.getSpace({index: i}));
         }
         return result;
     }
@@ -329,7 +327,7 @@ export class BingoBoardData extends Data {
         for (let i = 0; i < this.height; i++) {
             const row = [];
             for (let j = 0; j < this.width; j++) {
-                row.push(this.getSpace(i, j));
+                row.push(this.getSpace({row: i, col: j}));
             }
             result.push(row);
         }
@@ -341,7 +339,7 @@ export class BingoBoardData extends Data {
         for (let i = 0; i < this.width; i++) {
             const column = [];
             for (let j = 0; j < this.height; j++) {
-                column.push(this.getSpace(j, i));
+                column.push(this.getSpace({row: j, col: i}));
             }
             result.push(column);
         }
@@ -394,7 +392,7 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("width")) this.width = boardState.width;
         if (boardState.hasOwnProperty("height")) this.height = boardState.height;
         if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
-        if (boardState.hasOwnProperty("markedMask")) this.markedMask = BigInt(boardState.markedMask);
+        if (boardState.hasOwnProperty("markedMask")) this.markedMask = asBigInt(boardState.markedMask);
 
         return this;
     }
@@ -470,6 +468,16 @@ export class BingoBoardData extends Data {
 
     hasExactCenter() {
         return this.width % 2 === 1 && this.height % 2 === 1;
+    }
+
+    getCenterCoordinates() {
+        if (!this.hasExactCenter()) throw new Error("Board does not have an exact center.");
+        return [Math.floor(this.height / 2), Math.floor(this.width / 2)];
+    }
+
+    getCenterIndex() {
+        const [row, col] = this.getCenterCoordinates();
+        return this.coordinatesToIndex(row, col);
     }
 
     getSpaceName({row, col, index, wrap = false}={}) {
