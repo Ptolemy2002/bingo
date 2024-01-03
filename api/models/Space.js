@@ -9,14 +9,10 @@ const SpaceSchema = new Schema({
     },
     description: String,
     examples: [
-        {
-            type: String
-        }
+        String
     ],
     aliases: [
-        {
-            type: String
-        }
+        String
     ],
     tags: [
         {

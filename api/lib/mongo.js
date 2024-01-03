@@ -2,11 +2,16 @@ const mongoose = require('mongoose');
 const { tryFn } = require('lib/misc');
 const { transformRegex } = require('lib/regex');
 
+const ObjectId = mongoose.Types.ObjectId;
+
 require("models/Space");
+require("models/Game");
+require("models/Board");
 const Space = mongoose.model('spaces');
+const Game = mongoose.model('games');
+const Board = mongoose.model('boards');
 
 function keyType(collection, key) {
-    if (key === "_id") return mongoose.Types.ObjectId;
     return collection.schema.path(key).instance;
 }
 
@@ -30,7 +35,7 @@ function transformQuery(collection, query, args) {
         const value = query[key];
         const type = keyType(collection, key);
 
-        if (key === "_id") {
+        if (key === "_id" && type === ObjectId) {
             verifyValidId(value);
         } else if (type === "String") {
             query[key] = transformRegex(value, args);
@@ -75,7 +80,7 @@ async function delEither(collection, keys=[], query={}, args={}) {
 }
 
 async function create(model, data) {
-    data._id = new mongoose.Types.ObjectId();
+    if (keyType(model, "_id") === ObjectId) data._id = new ObjectId();
     data.isNew = true;
     return await model.create(data);
 }
@@ -108,6 +113,8 @@ async function search(collection, index, query) {
 
 module.exports = {
     Space,
+    Game,
+    Board,
 
     keyType,
     verifyValidId,

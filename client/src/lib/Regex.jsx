@@ -76,10 +76,11 @@ export function regexMatchWhole(value, flags = "") {
     }
 }
 
-export function transformRegex(value, args) {
-    if (args.accentInsensitive) value = regexAccentInsensitive(value);
-    if (args.caseInsensitive) value = regexCaseInsensitive(value);
-    if (args.matchWhole) value = regexMatchWhole(value);
+export function transformRegex(value, args={}) {
+    const flags = args.flags || "";
+    if (args.accentInsensitive) value = regexAccentInsensitive(value, flags);
+    if (args.caseInsensitive) value = regexCaseInsensitive(value, flags);
+    if (args.matchWhole) value = regexMatchWhole(value, flags);
     return value;
 }
 
@@ -87,7 +88,15 @@ export function cleanString(str) {
     return removeAccents(str).toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
 }
 
+export const alphanumericPattern = /[\w_-]/i;
+export const nonAlphanumericPattern = /[^\w_-]/i;
+
+export function isAlphanumeric(str) {
+    return transformRegex(alphanumericPattern, {matchWhole: true}).test(str);
+}
+
 export function toAlphanumeric(str, separator="-") {
-    const words = removeAccents(str).split(" ");
-    return words.map(word => word.replaceAll(/[^a-z0-9_-]/gi, "")).join(separator);
+    str = removeAccents(str);
+    const words = str.split(/\s+/);
+    return words.map(word => word.replaceAll(transformRegex(nonAlphanumericPattern, {matchWhole: true, flags: "g"}), separator)).join(" ");
 }
