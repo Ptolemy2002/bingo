@@ -313,6 +313,7 @@ export class BingoBoardData extends Data {
     height = 5;
     spaceNames = [];
     markedMask = 0n;
+    game = null;
 
     get spaces() {
         const result = [];
@@ -383,6 +384,7 @@ export class BingoBoardData extends Data {
             height: this.height,
             spaceNames: this.spaceNames.slice(),
             markedMask: this.markedMask.toString(),
+            game: this.game
         };
     }
 
@@ -393,8 +395,19 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("height")) this.height = boardState.height;
         if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
         if (boardState.hasOwnProperty("markedMask")) this.markedMask = asBigInt(boardState.markedMask);
+        if (boardState.hasOwnProperty("game")) this.game = boardState.game;
 
         return this;
+    }
+
+    markedMaskEquals(other) {
+        if (typeof other === "bigint") {
+            return this.markedMask === other;
+        } else if (other instanceof BingoBoardData) {
+            return this.markedMask === other.markedMask;
+        } else {
+            return this.markedMask === asBigInt(other);
+        }
     }
 
     jsonEquals(boardState) {
@@ -404,7 +417,8 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("width") && boardState.width !== this.width) return false;
         if (boardState.hasOwnProperty("height") && boardState.height !== this.height) return false;
         if (boardState.hasOwnProperty("spaceNames") && !listsEqual(boardState.spaceNames, this.spaceNames)) return false;
-        if (boardState.hasOwnProperty("markedMask") && boardState.markedMask !== this.markedMask.toString()) return false;
+        if (boardState.hasOwnProperty("markedMask") && this.markedMaskEquals(boardState.markedMask)) return false;
+        if (boardState.hasOwnProperty("game") && boardState.game !== this.game) return false;
 
         return true;
     }

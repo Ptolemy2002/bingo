@@ -3,7 +3,11 @@
 export function asBigInt(value) {
     if (typeof value === "bigint") {
         return value;
-    } else if (typeof value === "number" || typeof value === "string") {
+    } else if (typeof value === "number") {
+        return BigInt(value);
+    } else if (typeof value === "string" && value.endsWith("n")) {
+        return BigInt(value.slice(0, -1));
+    } else if (typeof value === "string") {
         return BigInt(value);
     } else {
         throw new TypeError(`Cannot convert value of type [${typeof value}] to BigInt.`);
