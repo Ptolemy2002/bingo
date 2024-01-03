@@ -20,6 +20,24 @@ const GameSchema = new Schema({
             String
         ],
         required: [(v) => v.length > 0, 'Players must not be empty'],
+    },
+
+    spacePools: {
+        type: Map,
+        of: new Schema({
+            name: {
+                type: String,
+                required: true,
+            },
+            description: String,
+            spaces: {
+                type: [
+                    String
+                ],
+                default: []
+            }
+        }),
+        default: {}
     }
 });
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { isAlphanumeric } = require('lib/regex');
 const Schema = mongoose.Schema;
 
 const SpaceSchema = new Schema({
@@ -17,9 +18,7 @@ const SpaceSchema = new Schema({
     tags: [
         {
             type: String,
-            required: function(t) {
-                return /^(\w|-)+$/.test(t);
-            }
+            required: [isAlphanumeric, 'Tag must be alphanumeric']
         }
     ],
 });

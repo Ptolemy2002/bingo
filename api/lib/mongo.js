@@ -111,6 +111,15 @@ async function search(collection, index, query) {
     }]);
 }
 
+async function makeUnique(collection, key, value) {
+    const existing = await listDistinct(collection, key);
+    let newValue = value;
+    while (existing.includes(newValue)) {
+        newValue += " (Copy)";
+    }
+    return newValue;
+}
+
 module.exports = {
     Space,
     Game,
@@ -128,5 +137,6 @@ module.exports = {
     delete: tryFn(del),
     deleteEither: tryFn(delEither),
     create: tryFn(create),
-    search: tryFn(search)
+    search: tryFn(search),
+    makeUnique: tryFn(makeUnique)
 };

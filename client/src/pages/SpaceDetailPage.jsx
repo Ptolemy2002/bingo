@@ -10,7 +10,7 @@ import BootstrapBadge from "src/lib/Bootstrap/Badge";
 import { CustomStringField, FieldList, EditFieldWithFilter, TabShortcuts } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
-import { toAlphanumeric } from "src/lib/Regex";
+import { isAlphanumeric, toAlphanumeric } from "src/lib/Regex";
 
 export default function QueryWrapper({editMode: initEditMode=false}={}) {
     const { name } = useParams();
@@ -638,9 +638,7 @@ export function TagField({
                 
                 custom={false}
                 staticCustom={false}
-                validate={
-                    (v) => /^(\w|-)*$/.test(v)
-                }
+                validate={isAlphanumeric}
 
                 list={tagList}
                 listStatus={tagListStatus}

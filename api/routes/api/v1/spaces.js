@@ -221,17 +221,8 @@ async function updateSpace(query, data) {
     return result;
 }
 
-async function makeUniqueName(name) {
-    const existingNames = await mongo.listDistinct(SpaceModel, "name");
-    let newName = name;
-    while (existingNames.includes(newName)) {
-        newName += " (Copy)";
-    }
-    return newName;
-}
-
 router.post("/new", async (req, res) => {
-    req.body.name = await makeUniqueName(req.body.name);
+    req.body.name = await mongo.makeUnique(SpaceModel, "name", req.body.name);
     const result = await newSpace(req.body);
     sendResponse(res, {name: req.body.name, result});
 });
@@ -258,7 +249,7 @@ router.put("/update/by-id/:id", async (req, res) => {
 
 async function duplicate(body, findOriginal) {
     const original = await findOriginal(body)[0];
-    const newName = await makeUniqueName(body.name || original.name);
+    const newName = await mongo.makeUnique(SpaceModel, "name", body.name || original.name);
 
     const newDoc = {
         ...original._doc,
@@ -270,12 +261,12 @@ async function duplicate(body, findOriginal) {
 }
 
 router.post("/duplicate/by-name/:name", async (req, res) => {
-    const result = await duplicate(req.body, (body) => mongo.find(SpaceModel, { name: req.params.name }));
+    const result = await duplicate(req.body, () => mongo.find(SpaceModel, { name: req.params.name }));
     sendResponse(res, result);
 });
 
 router.post("/duplicate/by-id/:id", async (req, res) => {
-    const result = await duplicate(req.body, (body) => mongo.find(SpaceModel, { _id: req.params.id }));
+    const result = await duplicate(req.body, () => mongo.find(SpaceModel, { _id: req.params.id }));
     sendResponse(res, result);
 });
 
