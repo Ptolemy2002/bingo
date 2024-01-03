@@ -88,8 +88,8 @@ export function cleanString(str) {
     return removeAccents(str).toLowerCase().replaceAll(/[^a-z0-9 ]/g, "");
 }
 
-export const alphanumericPattern = /[\w_-]/i;
-export const nonAlphanumericPattern = /[^\w_-]/i;
+export const alphanumericPattern = /[\w_-]*/i;
+export const nonAlphanumericPattern = /[^\w_-]*/i;
 
 export function isAlphanumeric(str) {
     return transformRegex(alphanumericPattern, {matchWhole: true}).test(str);
@@ -98,5 +98,5 @@ export function isAlphanumeric(str) {
 export function toAlphanumeric(str, separator="-") {
     str = removeAccents(str);
     const words = str.split(/\s+/);
-    return words.map(word => word.replaceAll(transformRegex(nonAlphanumericPattern, {matchWhole: true, flags: "g"}), separator)).join(" ");
+    return words.map(word => word.length === 0 ? "" : word.replaceAll(transformRegex(nonAlphanumericPattern, {matchWhole: true, flags: "g"}), separator)).join(separator);
 }

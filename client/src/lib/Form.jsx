@@ -81,8 +81,9 @@ export function EditField({
     }
 
     function validate(v) {
+        if (v === "") return true; // Empty is always valid, as it indicates no value
+
         if (number || integer) {
-            if (v === "") return true;
             if (v === "-" && (isNullOrUndefined(min) || min < 0)) return true;
             if (v === "+" && (isNullOrUndefined(max) || max >= 0)) return true;
             if (isNaN(v) || isNaN(parseFloat(v))) return false;
