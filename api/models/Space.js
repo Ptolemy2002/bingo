@@ -18,7 +18,7 @@ const SpaceSchema = new Schema({
     tags: [
         {
             type: String,
-            required: [isAlphanumeric, 'Tag must be alphanumeric']
+            match: /^[a-zA-Z0-9_-]+$/,
         }
     ],
 });

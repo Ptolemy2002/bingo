@@ -11,6 +11,9 @@ const Space = mongoose.model('spaces');
 const Game = mongoose.model('games');
 const Board = mongoose.model('boards');
 
+const gameEventEmitter = Game.watch();
+const boardEventEmitter = Board.watch();
+
 function keyType(collection, key) {
     return collection.schema.path(key).instance;
 }
@@ -124,6 +127,9 @@ module.exports = {
     Space,
     Game,
     Board,
+
+    gameEventEmitter,
+    boardEventEmitter,
 
     keyType,
     verifyValidId,

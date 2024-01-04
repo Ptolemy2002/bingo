@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { isAlphanumeric } = require('lib/regex');
 
 const GameSchema = new Schema({
     _id: {
         type: String,
-        required: [isAlphanumeric, 'Game ID must be alphanumeric'],
+        match: /^[a-zA-Z0-9_-]+$/
     },
 
     name: {
@@ -19,7 +18,10 @@ const GameSchema = new Schema({
         type: [
             String
         ],
-        required: [(v) => v.length > 0, 'Players must not be empty'],
+        required: function() {
+            return this.players.length > 0;
+        },
+        default: []
     },
 
     spacePools: {
@@ -32,7 +34,10 @@ const GameSchema = new Schema({
             description: String,
             spaces: {
                 type: [
-                    String
+                    {
+                        type: String,
+                        match: /^.+$/
+                    }
                 ],
                 default: []
             }

@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const mongo = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
-const { toAlphanumeric } = require("lib/regex");
+const { toAlphanumeric, escapeRegex } = require("lib/regex");
 
 const GameModel = mongo.Game;
-const BoardModel = mongo.Board;
+const eventListener = mongo.gameEventEmitter;
 
 function convertKey(key) {
     switch (key) {
@@ -244,6 +244,10 @@ router.post("/duplicate/by-name/:name", async (req, res) => {
 router.post("/duplicate/by-id/:id", async (req, res) => {
     const result = await duplicate(req.body, () => mongo.find(GameModel, { _id: req.params.id }));
     sendResponse(res, result);
+});
+
+eventListener.on("change", (change) => {
+    console.log(JSON.stringify(change));
 });
 
 module.exports = router;

@@ -6,11 +6,24 @@ const accentPatterns = [
     "(u|ú|ù|ü|û)", "(U|Ú|Ù|Ü|Û)"
 ];
 
+function combineFlags(...flags) {
+    const result = new Set();
+    flags.forEach((flag) => {
+        if (flag) {
+            flag.split("").forEach((c) => {
+                if (!result.has(c)) result.add(c);
+            });
+        }
+    });
+
+    return [...result].join("");
+}
+
 function escapeRegex(value, flags = "") {
     if (typeof value === 'string') {
         return new RegExp(value.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
     } else if (value instanceof RegExp) {
-        return escapeRegex(value.source, value.flags);
+        return escapeRegex(value.source, combineFlags(value.flags, flags));
     } else {
         throw new TypeError("Expected string or RegExp, got " + typeof value);
     }
@@ -23,7 +36,7 @@ function regexAccentInsensitive(value, flags = "") {
         });
         return new RegExp(value, flags);
     } else if (value instanceof RegExp) {
-        return regexAccentInsensitive(value.source, value.flags);
+        return regexAccentInsensitive(value.source, combineFlags(value.flags, flags));
     } else {
         throw new TypeError("Expected string or RegExp, got " + typeof value);
     }
@@ -47,7 +60,7 @@ function regexCaseInsensitive(value, flags = "") {
         }
         return new RegExp(value, flags);
     } else if (value instanceof RegExp) {
-        return regexCaseInsensitive(value.source, value.flags);
+        return regexCaseInsensitive(value.source, combineFlags(value.flags, flags));
     } else {
         throw new TypeError("Expected string or RegExp, got " + typeof value);
     }
@@ -57,7 +70,7 @@ function regexMatchWhole(value, flags = "") {
     if (typeof value === 'string') {
         return new RegExp(`^${value}$`, flags);
     } else if (value instanceof RegExp) {
-        return regexMatchWhole(value.source, value.flags);
+        return regexMatchWhole(value.source, combineFlags(value.flags, flags));
     } else {
         throw new TypeError("Expected string or RegExp, got " + typeof value);
     }

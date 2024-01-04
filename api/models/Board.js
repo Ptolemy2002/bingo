@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { isAlphanumeric } = require('lib/regex');
 
 const BoardSchema = new Schema({
     _id: {
         type: String,
-        required: [isAlphanumeric, 'Board ID must be alphanumeric'],
+        match: /^[a-zA-Z0-9_-]+$/
     },
 
     name: {
@@ -28,7 +27,10 @@ const BoardSchema = new Schema({
 
     spaceNames: {
         type: [
-            String
+            {
+                type: String,
+                match: /^.+$/
+            }
         ],
         required: true
     },
