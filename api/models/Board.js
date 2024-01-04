@@ -4,13 +4,17 @@ const Schema = mongoose.Schema;
 const BoardSchema = new Schema({
     _id: {
         type: String,
-        match: /^[a-zA-Z0-9_-]+$/
+        match: /^[a-zA-Z0-9_-]+$/,
+        lowercase: true,
+        trim: true,
+        minlength: 1
     },
 
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
 
     width: {
@@ -29,7 +33,8 @@ const BoardSchema = new Schema({
         type: [
             {
                 type: String,
-                match: /^.+$/
+                trim: true,
+                minlength: 1
             }
         ],
         required: true
@@ -37,7 +42,9 @@ const BoardSchema = new Schema({
 
     markedMask: {
         type: String,
-        required: true
+        match: /^[0-9]+n?$/,
+        required: true,
+        minlength: 1
     },
 
     game: {

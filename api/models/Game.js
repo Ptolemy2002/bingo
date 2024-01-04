@@ -4,16 +4,23 @@ const Schema = mongoose.Schema;
 const GameSchema = new Schema({
     _id: {
         type: String,
-        match: /^[a-zA-Z0-9_-]+$/
+        match: /^[a-zA-Z0-9_-]+$/,
+        lowercase: true,
+        trim: true,
+        minlength: 1
     },
 
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
 
-    description: String,
+    description: {
+        type: String,
+        default: ""
+    },
     players: {
         type: [
             String
@@ -31,12 +38,16 @@ const GameSchema = new Schema({
                 type: String,
                 required: true,
             },
-            description: String,
+            description: {
+                type: String,
+                default: ""
+            },
             spaces: {
                 type: [
                     {
                         type: String,
-                        match: /^.+$/
+                        trim: true,
+                        minlength: 1
                     }
                 ],
                 default: []

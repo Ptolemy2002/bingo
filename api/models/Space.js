@@ -6,19 +6,34 @@ const SpaceSchema = new Schema({
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true,
+        minlength: 1
     },
-    description: String,
+    description: {
+        type: String,
+        default: ""
+    },
     examples: [
-        String
+        {
+            type: String,
+            trim: true,
+            minlength: 1
+        }
     ],
     aliases: [
-        String
+        {
+            type: String,
+            trim: true,
+            minlength: 1
+        }
     ],
     tags: [
         {
             type: String,
             match: /^[a-zA-Z0-9_-]+$/,
+            lowercase: true,
+            trim: true
         }
     ],
 });
