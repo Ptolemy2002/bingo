@@ -20,13 +20,15 @@ const BoardSchema = new Schema({
     width: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
+        max: 11
     },
 
     height: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
+        max: 11
     },
 
     spaceNames: {
