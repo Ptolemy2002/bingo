@@ -20,7 +20,7 @@ const GameSchema = new Schema({
 
     description: {
         type: String,
-        default: ""
+        default: null
     },
     players: {
         type: [

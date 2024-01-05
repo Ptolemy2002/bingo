@@ -1,5 +1,5 @@
 import { useMountEffect, wrapNumber } from "src/lib/Misc";
-import { listsEqual } from "src/lib/List";
+import { listsEqual, objectsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
 import { isBitOn, setBit, asBigInt } from "src/lib/Bitwise";
@@ -333,6 +333,193 @@ export class Data {
     }
 }
 
+function useData(value, {
+    path,
+    primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
+    dataClass
+}={}) {
+    const _push = useApi(`${path}/update/by-${primaryKey}/:value`)[2];
+    const _pull = useApi(`${path}/by-exact-${primaryKey}/:value`)[2];
+    const _duplicate = useApi(`${path}/new`)[2];
+    const _delete = useApi(`${path}/by-exact-${primaryKey}/:value`)[2]; // Same as pull, but the DELETE method has different behavior
+
+    const [data] = useState(
+        primaryKey === "id" ? (
+            dataClass.createFromID(value, _push, _pull, _duplicate, _delete)
+        ) :
+        // else
+        (
+            dataClass.createFromJSON({[primaryKey]: value}, _push, _pull, _duplicate, _delete)
+        )
+    );
+
+    // Start pulling data on first mount
+    useMountEffect(() => {
+        data.pull(onPullSuccess, onPullFailure);
+    });
+
+    return data;
+}
+
+function useDataContext(contextClass) {
+    const context = useContext(contextClass);
+    if (context === undefined) {
+        throw new Error(`No ${contextClass.name} provider found.`);
+    }
+    return context;
+}
+
+// These two functions are just utility, so they shouldn't be exported. Use DataProvider instead.
+function DataProviderData({
+    value,
+    children,
+    contextClass
+}={}) {
+    return (
+        <contextClass.Provider value={value}>
+            {children}
+        </contextClass.Provider>
+    );
+}
+
+function DataProviderUse({
+    value,
+    primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
+    contextClass,
+    dataClass,
+    children
+}={}) {
+    const data = useData(value, { primaryKey, onPullSuccess, onPullFailure, dataClass });
+    return (
+        <DataProviderData value={data} contextClass={contextClass}>
+            {children}
+        </DataProviderData>
+    );
+}
+
+function DataProvider({
+    data,
+    value,
+    primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
+    contextClass,
+    dataClass,
+    children
+}={}) {
+    if (data) {
+        return <DataProviderData value={data} contextClass={contextClass}>{children}</DataProviderData>;
+    } else {
+        return <DataProviderUse value={value} primaryKey={primaryKey} onPullSuccess={onPullSuccess} onPullFailure={onPullFailure} contextClass={contextClass} dataClass={dataClass}>{children}</DataProviderUse>;
+    }
+}
+
+export class BingoGameData extends Data {
+    id = null;
+    name = "Unknown Game";
+    description = null;
+    players = [];
+    spacePools = {};
+
+    static createFromID(id, _push, _pull, _duplicate, _delete) {
+        const result = new BingoGameData();
+        result.id = id;
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    static createFromJSON(gameState, _push, _pull, _duplicate, _delete) {
+        const result = new BingoGameData();
+        result.fromJSON(gameState).checkpoint();
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    toJSON() {
+        return {
+            _id: this.id,
+            name: this.name,
+            description: this.description,
+            players: this.players.slice(),
+            spacePools: this.spacePools,
+        };
+    }
+
+    fromJSON(gameState) {
+        if (gameState.hasOwnProperty("_id")) this.id = gameState._id;
+        if (gameState.hasOwnProperty("name")) this.name = gameState.name;
+        if (gameState.hasOwnProperty("description")) this.description = gameState.description;
+        if (gameState.hasOwnProperty("players")) this.players = gameState.players.slice();
+        if (gameState.hasOwnProperty("spacePools")) this.spacePools = gameState.spacePools;
+
+        return this;
+    }
+
+    jsonEquals(gameState) {
+        gameState = gameState || {};
+        if (gameState.hasOwnProperty("_id") && gameState._id !== this.id) return false;
+        if (gameState.hasOwnProperty("name") && gameState.name !== this.name) return false;
+        if (gameState.hasOwnProperty("description") && gameState.description !== this.description) return false;
+        if (gameState.hasOwnProperty("players") && !listsEqual(gameState.players, this.players)) return false;
+        if (gameState.hasOwnProperty("spacePools") && !objectsEqual(gameState.spacePools, this.spacePools)) return false;
+
+        return true;
+    }
+
+    clone() {
+        return BingoGameData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
+    }
+}
+
+export function useBingoGameData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
+    return useData(value, {
+        path: "games",
+        primaryKey,
+        onPullSuccess,
+        onPullFailure,
+        dataClass: BingoGameData
+    });
+}
+
+export const BingoGameContext = createContext(undefined);
+
+export function useBingoGameDataContext() {
+    return useDataContext(BingoGameContext);
+}
+
+export function BingoGameDataProvider({
+    data,
+    value,
+    primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
+    children
+}={}) {
+    return (
+        <DataProvider
+            data={data}
+            value={value}
+            primaryKey={primaryKey}
+            onPullSuccess={onPullSuccess}
+            onPullFailure={onPullFailure}
+            contextClass={BingoGameContext}
+            dataClass={BingoGameData}
+        >
+            {children}
+        </DataProvider>
+    );
+}
+
 export class BingoBoardData extends Data {
     id = null;
     name = "Unknown Board";
@@ -604,6 +791,35 @@ export class BingoBoardData extends Data {
     }
 }
 
+export const BingoBoardContext = createContext(undefined);
+
+export function useBingoBoardDataContext() {
+    return useDataContext(BingoGameContext);
+}
+
+export function BingoBoardDataProvider({
+    data,
+    value,
+    primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
+    children
+}={}) {
+    return (
+        <DataProvider
+            data={data}
+            value={value}
+            primaryKey={primaryKey}
+            onPullSuccess={onPullSuccess}
+            onPullFailure={onPullFailure}
+            contextClass={BingoBoardContext}
+            dataClass={BingoBoardData}
+        >
+            {children}
+        </DataProvider>
+    );
+}
+
 export class BingoSpaceData extends Data {
     id = null;
     name = "Unknown Space";
@@ -698,47 +914,28 @@ export function useBingoSpaceData(value, {primaryKey = "name", onPullSuccess, on
 export const BingoSpaceContext = createContext(undefined);
 
 export function useBingoSpaceDataContext() {
-    const context = useContext(BingoSpaceContext);
-    if (context === undefined) {
-        throw new Error("No BingoSpaceData provider found.");
-    }
-    return context;
-}
-
-// These two functions are just utility, so they shouldn't be exported. Use BingoSpaceProvider instead.
-function BingoSpaceDataProviderData({
-    value,
-    children
-}={}) {
-    return (
-        <BingoSpaceContext.Provider value={value}>
-            {children}
-        </BingoSpaceContext.Provider>
-    );
-}
-
-function BingoSpaceDataProviderUse({
-    value,
-    primaryKey = "name",
-    children
-}={}) {
-    const spaceData = useBingoSpaceData(value, { primaryKey });
-    return (
-        <BingoSpaceDataProviderData value={spaceData}>
-            {children}
-        </BingoSpaceDataProviderData>
-    );
+    return useDataContext(BingoSpaceContext);
 }
 
 export function BingoSpaceDataProvider({
     data,
     value,
     primaryKey = "name",
+    onPullSuccess,
+    onPullFailure,
     children
 }={}) {
-    if (data) {
-        return <BingoSpaceDataProviderData value={data}>{children}</BingoSpaceDataProviderData>;
-    } else {
-        return <BingoSpaceDataProviderUse value={value} primaryKey={primaryKey}>{children}</BingoSpaceDataProviderUse>;
-    }
+    return (
+        <DataProvider
+            data={data}
+            value={value}
+            primaryKey={primaryKey}
+            onPullSuccess={onPullSuccess}
+            onPullFailure={onPullFailure}
+            contextClass={BingoSpaceContext}
+            dataClass={BingoSpaceData}
+        >
+            {children}
+        </DataProvider>
+    );
 }

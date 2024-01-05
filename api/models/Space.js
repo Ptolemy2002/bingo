@@ -12,7 +12,7 @@ const SpaceSchema = new Schema({
     },
     description: {
         type: String,
-        default: ""
+        default: null
     },
     examples: [
         {
