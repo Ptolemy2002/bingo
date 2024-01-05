@@ -14,7 +14,8 @@ const GameSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        trim: true
+        trim: true,
+        minlength: 1
     },
 
     description: {
@@ -23,7 +24,11 @@ const GameSchema = new Schema({
     },
     players: {
         type: [
-            String
+            {
+                type: String,
+                trim: true,
+                minlength: 1
+            }
         ],
         required: function() {
             return this.players.length > 0;
@@ -37,6 +42,8 @@ const GameSchema = new Schema({
             name: {
                 type: String,
                 required: true,
+                trim: true,
+                minlength: 1
             },
             description: {
                 type: String,

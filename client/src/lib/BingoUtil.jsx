@@ -8,11 +8,13 @@ export class Data {
     lastRequest = null;
     requestInProgress = false;
     requestFailed = false;
+    requestAborted = false;
     requestError = null;
     _push = null;
     _pull = null;
     _duplicate = null;
     _delete = null;
+    abortController = null;
 
     previousStates = [];
     _stateIndex = 0;
@@ -146,14 +148,16 @@ export class Data {
         this.lastRequest = "push";
         this.requestError = null;
         this.requestFailed = false;
+        this.requestAborted = false;
         this.requestInProgress = true;
         
-        this._push({
+        this.abortController = this._push({
             method: "PUT",
             body: this.toJSON(),
             onSuccess: (data) => {
                 this.checkpoint("push");
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onSuccess) onSuccess(data);
             },
 
@@ -161,6 +165,7 @@ export class Data {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onFailure) onFailure(err);
             }
         });
@@ -182,9 +187,10 @@ export class Data {
         this.lastRequest = "pull";
         this.requestError = null;
         this.requestFailed = false;
+        this.requestAborted = false;
         this.requestInProgress = true;
 
-        this._pull({
+        this.abortController = this._pull({
             onSuccess: (data) => {
                 if (Array.isArray(data)) {
                     if (data.length === 0) {
@@ -193,6 +199,7 @@ export class Data {
                         this.requestError = err;
                         this.requestFailed = true;
                         this.requestInProgress = false;
+                        this.abortController = null;
                         if (onFailure) onFailure(err);
                         return;
                     }
@@ -204,6 +211,7 @@ export class Data {
 
                 this.checkpoint("pull");
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onSuccess) onSuccess(data);
             },
 
@@ -211,6 +219,7 @@ export class Data {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onFailure) onFailure(err);
             }
         });
@@ -232,13 +241,15 @@ export class Data {
         this.lastRequest = "duplicate";
         this.requestError = null;
         this.requestFailed = false;
+        this.requestAborted = false;
         this.requestInProgress = true;
 
-        this._duplicate({
+        this.abortController = this._duplicate({
             method: "POST",
             body: this.toJSON(),
             onSuccess: (data) => {
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onSuccess) onSuccess(data);
             },
 
@@ -246,6 +257,7 @@ export class Data {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onFailure) onFailure(err);
             }
         });
@@ -267,12 +279,14 @@ export class Data {
         this.lastRequest = "delete";
         this.requestError = null;
         this.requestFailed = false;
+        this.requestAborted = false;
         this.requestInProgress = true;
 
-        this._delete({
+        this.abortController = this._delete({
             method: "DELETE",
             onSuccess: (data) => {
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onSuccess) onSuccess(data);
             },
 
@@ -280,6 +294,7 @@ export class Data {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                this.abortController = null;
                 if (onFailure) onFailure(err);
             }
         });
@@ -304,6 +319,18 @@ export class Data {
         return !this.requestFailed && this.hasLastRequest(type);
     }
 
+    hasAbortedRequest(type) {
+        return this.requestAborted && this.hasLastRequest(type);
+    }
+
+    abortRequest(type) {
+        if (this.hasInProgressRequest(type) && this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+            this.requestInProgress = false;
+            this.requestAborted = true;
+        }
+    }
 }
 
 export class BingoBoardData extends Data {
@@ -314,6 +341,7 @@ export class BingoBoardData extends Data {
     spaceNames = [];
     markedMask = 0n;
     game = null;
+    owner = null;
 
     get spaces() {
         const result = [];
@@ -384,7 +412,8 @@ export class BingoBoardData extends Data {
             height: this.height,
             spaceNames: this.spaceNames.slice(),
             markedMask: this.markedMask.toString(),
-            game: this.game
+            game: this.game,
+            owner: this.owner
         };
     }
 
@@ -396,6 +425,7 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
         if (boardState.hasOwnProperty("markedMask")) this.markedMask = asBigInt(boardState.markedMask);
         if (boardState.hasOwnProperty("game")) this.game = boardState.game;
+        if (boardState.hasOwnProperty("owner")) this.owner = boardState.owner;
 
         return this;
     }
@@ -419,6 +449,7 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("spaceNames") && !listsEqual(boardState.spaceNames, this.spaceNames)) return false;
         if (boardState.hasOwnProperty("markedMask") && this.markedMaskEquals(boardState.markedMask)) return false;
         if (boardState.hasOwnProperty("game") && boardState.game !== this.game) return false;
+        if (boardState.hasOwnProperty("owner") && boardState.owner !== this.owner) return false;
 
         return true;
     }

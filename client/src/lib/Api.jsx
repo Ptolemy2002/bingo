@@ -59,6 +59,9 @@ export function useApi(path, sort=false, sortFunc=null) {
         }
 
         const options = {method, queryParams};
+        const abortController = new AbortController();
+
+        options.signal = abortController.signal;
 
         if (method !== "GET") {
             const body = (
@@ -103,6 +106,8 @@ export function useApi(path, sort=false, sortFunc=null) {
                     onCompletion();
                 }
             });
+        
+        return abortController;
     }
 
     return [data, {started, completed, failed, error}, sendRequest];

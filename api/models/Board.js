@@ -14,7 +14,8 @@ const BoardSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        trim: true
+        trim: true,
+        minlength: 1
     },
 
     width: {
@@ -54,6 +55,13 @@ const BoardSchema = new Schema({
         required: true,
         ref: "games"
     },
+
+    owner: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 1
+    }
 });
 
 module.exports = mongoose.model('boards', BoardSchema);
