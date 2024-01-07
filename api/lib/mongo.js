@@ -83,7 +83,7 @@ async function delEither(collection, keys=[], query={}, args={}) {
 }
 
 async function create(model, data) {
-    if (keyType(model, "_id") === ObjectId) data._id = new ObjectId();
+    if (keyType(model, "_id") === "ObjectId") data._id = new ObjectId();
     data.isNew = true;
     return await model.create(data);
 }

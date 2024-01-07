@@ -31,6 +31,27 @@ export class Data {
         }
     }
 
+    static createFromID(id, _push, _pull, _duplicate, _delete) {
+        const result = new this();
+        result.id = id;
+        result.checkpoint();
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
+    static createFromJSON(data, _push, _pull, _duplicate, _delete) {
+        const result = new this();
+        result.fromJSON(data).checkpoint();
+        result._push = _push;
+        result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
+        return result;
+    }
+
     isDirty(type=null) {
         return !this.jsonEquals(this.lastCheckpoint(type, this.stateIndex));
     }
@@ -138,38 +159,54 @@ export class Data {
         return this.constructor.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
     }
 
-    push(onSuccess, onFailure) {
-        if (!this._push) throw new TypeError("Push function not set.");
-        if (this.requestInProgress) {
-            if (this.lastRequest === "push") {
-                console.warn("Attempted to push data while a push request was already in progress. Ignoring...");
-                return this;
-            } else {
-                throw new Error("Attempted to push data while another request was in progress. This is not supported.");
-            }
-        }
-
-        this.lastRequest = "push";
-        this.requestError = null;
+    _initRequest(type) {
+        this.lastRequest = type;
+        this.requestInProgress = true;
         this.requestFailed = false;
         this.requestAborted = false;
-        this.requestInProgress = true;
-        
+        this.requestError = null;
+        return this;
+    }
+
+    _requestSuccess(type) {
+        this.checkpoint(type);
+        this.requestInProgress = false;
+        this.requestFailed = false;
+        this.requestAborted = false;
+        this.requestError = null;
+        this.abortController = null;
+        return this;
+    }
+
+    _requestFailed(err) {
+        this.requestError = err;
+        this.requestFailed = true;
+        this.requestInProgress = false;
+        this.requestAborted = false;
+        this.abortController = null;
+        return this;
+    }
+
+    push(onSuccess, onFailure) {
+        if (!this._push) throw new TypeError("Push function not set.");
+        if (this.hasInProgressRequest("push")) {
+            console.warn("Attempted to push data while a push request was already in progress. Ignoring...");
+            return this;
+        } else if (this.hasInProgressRequest()) {
+            throw new Error("Attempted to push data while another request was in progress. This is not supported.");
+        }
+
+        this._initRequest("push");
         this.abortController = this._push({
             method: "PUT",
             body: this.toJSON(),
             onSuccess: (data) => {
-                this.checkpoint("push");
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestSuccess("push");
                 if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                this.requestError = err;
-                this.requestFailed = true;
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestFailed(err);
                 if (onFailure) onFailure(err);
             }
         });
@@ -179,31 +216,21 @@ export class Data {
 
     pull(onSuccess, onFailure) {
         if (!this._pull) throw new TypeError("Pull function not set.");
-        if (this.requestInProgress) {
-            if (this.lastRequest === "pull") {
-                console.warn("Attempted to pull data while a pull request was already in progress. Ignoring...");
-                return this;
-            } else {
-                throw new Error("Attempted to pull data while another request was in progress. This is not supported.");
-            }
+        if (this.hasInProgressRequest("pull")) {
+            console.warn("Attempted to pull data while a pull request was already in progress. Ignoring...");
+            return this;
+        } else if (this.hasInProgressRequest()) {
+            throw new Error("Attempted to pull data while another request was in progress. This is not supported.");
         }
 
-        this.lastRequest = "pull";
-        this.requestError = null;
-        this.requestFailed = false;
-        this.requestAborted = false;
-        this.requestInProgress = true;
-
+        this._initRequest("pull");
         this.abortController = this._pull({
             onSuccess: (data) => {
                 if (Array.isArray(data)) {
                     if (data.length === 0) {
                         const err = new Error("No data returned from server.");
                         err.is404 = true;
-                        this.requestError = err;
-                        this.requestFailed = true;
-                        this.requestInProgress = false;
-                        this.abortController = null;
+                        this._requestFailed(err);
                         if (onFailure) onFailure(err);
                         return;
                     }
@@ -213,17 +240,12 @@ export class Data {
                     this.fromJSON(data);
                 }
 
-                this.checkpoint("pull");
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestSuccess("pull");
                 if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                this.requestError = err;
-                this.requestFailed = true;
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestFailed(err);
                 if (onFailure) onFailure(err);
             }
         });
@@ -233,35 +255,24 @@ export class Data {
 
     duplicate(onSuccess, onFailure) {
         if (!this._duplicate) throw new TypeError("Duplicate function not set.");
-        if (this.requestInProgress) {
-            if (this.lastRequest === "duplicate") {
-                console.warn("Attempted to duplicate data while a duplicate request was already in progress. Ignoring...");
-                return this;
-            } else {
-                throw new Error("Attempted to duplicate data while another request was in progress. This is not supported.");
-            }
+        if (this.hasInProgressRequest("duplicate")) {
+            console.warn("Attempted to duplicate data while a duplicate request was already in progress. Ignoring...");
+            return this;
+        } else if (this.hasInProgressRequest()) {
+            throw new Error("Attempted to duplicate data while another request was in progress. This is not supported.");
         }
 
-        this.lastRequest = "duplicate";
-        this.requestError = null;
-        this.requestFailed = false;
-        this.requestAborted = false;
-        this.requestInProgress = true;
-
+        this._initRequest("duplicate");
         this.abortController = this._duplicate({
             method: "POST",
             body: this.toJSON(),
             onSuccess: (data) => {
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestSuccess("duplicate");
                 if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                this.requestError = err;
-                this.requestFailed = true;
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestFailed(err);
                 if (onFailure) onFailure(err);
             }
         });
@@ -271,34 +282,23 @@ export class Data {
 
     delete(onSuccess, onFailure) {
         if (!this._delete) throw new TypeError("Delete function not set.");
-        if (this.requestInProgress) {
-            if (this.lastRequest === "delete") {
-                console.warn("Attempted to delete data while a delete request was already in progress. Ignoring...");
-                return this;
-            } else {
-                throw new Error("Attempted to delete data while another request was in progress. This is not supported.");
-            }
+        if (this.hasInProgressRequest("delete")) {
+            console.warn("Attempted to delete data while a delete request was already in progress. Ignoring...");
+            return this;
+        } else if (this.hasInProgressRequest()) {
+            throw new Error("Attempted to delete data while another request was in progress. This is not supported.");
         }
 
-        this.lastRequest = "delete";
-        this.requestError = null;
-        this.requestFailed = false;
-        this.requestAborted = false;
-        this.requestInProgress = true;
-
+        this._initRequest("delete");
         this.abortController = this._delete({
             method: "DELETE",
             onSuccess: (data) => {
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestSuccess("delete");
                 if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                this.requestError = err;
-                this.requestFailed = true;
-                this.requestInProgress = false;
-                this.abortController = null;
+                this._requestFailed(err);
                 if (onFailure) onFailure(err);
             }
         });
@@ -308,6 +308,7 @@ export class Data {
 
     hasLastRequest(type) {
         if (type === undefined) return this.lastRequest !== null;
+        if (Array.isArray(type)) return type.includes(this.lastRequest);
         return this.lastRequest === type;
     }
 
@@ -344,10 +345,10 @@ function useData(value, {
     onPullFailure,
     dataClass
 }={}) {
-    const _push = useApi(`${path}/update/by-${primaryKey}/:value`)[2];
-    const _pull = useApi(`${path}/by-exact-${primaryKey}/:value`)[2];
+    const _push = useApi(`${path}/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _pull = useApi(`${path}/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _duplicate = useApi(`${path}/new`)[2];
-    const _delete = useApi(`${path}/by-exact-${primaryKey}/:value`)[2]; // Same as pull, but the DELETE method has different behavior
+    const _delete = useApi(`${path}/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2]; // Same as pull, but the DELETE method has different behavior
 
     const [data] = useState(
         primaryKey === "id" ? (
@@ -429,25 +430,9 @@ export class BingoGameData extends Data {
     players = [];
     spacePools = {};
 
-    static createFromID(id, _push, _pull, _duplicate, _delete) {
-        const result = new BingoGameData();
-        result.id = id;
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    static createFromJSON(gameState, _push, _pull, _duplicate, _delete) {
-        const result = new BingoGameData();
-        result.fromJSON(gameState).checkpoint();
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
+    // Inherit the static methods from Data, as this is not done automatically
+    static createFromID = Data.createFromID;
+    static createFromJSON = Data.createFromJSON;
 
     toJSON() {
         return {
@@ -571,25 +556,9 @@ export class BingoBoardData extends Data {
         return this;
     }
 
-    static createFromID(id, _push, _pull, _duplicate, _delete) {
-        const result = new BingoBoardData();
-        result.id = id;
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    static createFromJSON(boardState, _push, _pull, _duplicate, _delete) {
-        const result = new BingoBoardData();
-        result.fromJSON(boardState).checkpoint();
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
+    // Inherit the static methods from Data, as this is not done automatically
+    static createFromID = Data.createFromID;
+    static createFromJSON = Data.createFromJSON;
 
     toJSON() {
         return {
@@ -787,6 +756,16 @@ export class BingoBoardData extends Data {
     }
 }
 
+export function useBingoBoardData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
+    return useData(value, {
+        path: "boards",
+        primaryKey,
+        onPullSuccess,
+        onPullFailure,
+        dataClass: BingoBoardData
+    });
+}
+
 export const BingoBoardContext = createContext(undefined);
 
 export function useBingoBoardDataContext() {
@@ -824,25 +803,9 @@ export class BingoSpaceData extends Data {
     aliases = [];
     tags = [];
 
-    static createFromID(id, _push, _pull, _duplicate, _delete) {
-        const result = new BingoSpaceData();
-        result.id = id;
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
-
-    static createFromJSON(spaceState, _push, _pull, _duplicate, _delete) {
-        const result = new BingoSpaceData();
-        result.fromJSON(spaceState).checkpoint();
-        result._push = _push;
-        result._pull = _pull;
-        result._duplicate = _duplicate;
-        result._delete = _delete;
-        return result;
-    }
+    // Inherit the static methods from Data, as this is not done automatically
+    static createFromID = Data.createFromID;
+    static createFromJSON = Data.createFromJSON;
 
     toJSON() {
         return {
@@ -880,27 +843,13 @@ export class BingoSpaceData extends Data {
 }
 
 export function useBingoSpaceData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
-    const _push = useApi(`spaces/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _pull = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _duplicate = useApi(`spaces/new`)[2];
-    const _delete = useApi(`spaces/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2]; // Same as pull, but the DELETE method has different behavior
-
-    const [spaceData] = useState(
-        primaryKey === "id" ? (
-            BingoSpaceData.createFromID(value, _push, _pull, _duplicate, _delete)
-        ) :
-        // else
-        (
-            BingoSpaceData.createFromJSON({[primaryKey]: value}, _push, _pull, _duplicate, _delete)
-        )
-    );
-
-    // Start pulling data on first mount
-    useMountEffect(() => {
-        spaceData.pull(onPullSuccess, onPullFailure);
+    return useData(value, {
+        path: "spaces",
+        primaryKey,
+        onPullSuccess,
+        onPullFailure,
+        dataClass: BingoSpaceData
     });
-
-    return spaceData;
 }
 
 export const BingoSpaceContext = createContext(undefined);

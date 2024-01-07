@@ -234,7 +234,7 @@ router.put("/update/by-name/:name", async (req, res) => {
     if (existingNames.includes(req.params.name)) {
         result = await updateSpace({ name: req.params.name }, req.body);
     } else {
-        req.params.name = await makeUniqueName(req.params.name);
+        req.body.name = await mongo.makeUnique(SpaceModel, "name", req.params.name);
         result = await newSpace(req.body);
     }
 

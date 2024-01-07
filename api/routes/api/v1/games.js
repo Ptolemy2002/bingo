@@ -216,14 +216,14 @@ router.post("/new", async (req, res) => {
     sendResponse(res, result);
 });
 
-router.post("/update/by-name/:name", async (req, res) => {
+router.put("/update/by-name/:name", async (req, res) => {
     const existingNames = await mongo.listDistinct(GameModel, "name");
 
     let result;
     if (existingNames.includes(req.params.name)) {
         result = await updateGame({ name: req.params.name }, req.body);
     } else {
-        req.params.name = await mongo.makeUnique(GameModel, "name", req.params.name);
+        req.body.name = await mongo.makeUnique(GameModel, "name", req.params.name);
         result = await newGame(req.body);
     }
 
