@@ -40,7 +40,7 @@ function transformQuery(collection, query, args) {
         
         if (key === "_id" && type === ObjectId) {
             verifyValidId(value);
-        } else if (type === "String" || type === "Array") {
+        } else if (type === "String" || (type === "Array" && (typeof value === "string" || value instanceof RegExp))) {
             query[key] = transformRegex(value, args);
         }
     });
