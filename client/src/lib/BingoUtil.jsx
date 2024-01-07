@@ -134,6 +134,10 @@ export class Data {
         return this;
     }
 
+    clone() {
+        return this.constructor.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
+    }
+
     push(onSuccess, onFailure) {
         if (!this._push) throw new TypeError("Push function not set.");
         if (this.requestInProgress) {
@@ -475,10 +479,6 @@ export class BingoGameData extends Data {
 
         return true;
     }
-
-    clone() {
-        return BingoGameData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
-    }
 }
 
 export function useBingoGameData(value, {primaryKey = "name", onPullSuccess, onPullFailure}={}) {
@@ -639,10 +639,6 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("owner") && boardState.owner !== this.owner) return false;
 
         return true;
-    }
-
-    clone() {
-        return BingoBoardData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
     }
 
     validateIndex(i, wrap = false) {
@@ -880,10 +876,6 @@ export class BingoSpaceData extends Data {
         if (spaceState.hasOwnProperty("tags") && !listsEqual(spaceState.tags, this.tags)) return false;
 
         return true;
-    }
-
-    clone() {
-        return BingoSpaceData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
     }
 }
 
