@@ -37,10 +37,10 @@ function transformQuery(collection, query, args) {
     Object.keys(query).forEach((key) => {
         const value = query[key];
         const type = keyType(collection, key);
-
+        
         if (key === "_id" && type === ObjectId) {
             verifyValidId(value);
-        } else if (type === "String") {
+        } else if (type === "String" || type === "Array") {
             query[key] = transformRegex(value, args);
         }
     });

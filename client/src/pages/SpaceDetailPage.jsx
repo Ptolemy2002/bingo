@@ -6,7 +6,7 @@ import NotFoundPage from "./NotFoundPage";
 import BootstrapButton from "src/lib/Bootstrap/Button";
 import MarkdownRenderer, { MarkdownEditorButtons, MarkdownKeyboardShortcuts } from "src/lib/Markdown";
 import { Spacer, combineClassNames, listInPlainEnglish, useMountEffect } from "src/lib/Misc";
-import BootstrapBadge from "src/lib/Bootstrap/Badge";
+import TagBadge from "src/components/TagBadge";
 import { CustomStringField, FieldList, EditFieldWithFilter, TabShortcuts } from "src/lib/Form";
 import { useApi } from "src/lib/Api";
 import { isSet } from "src/lib/List";
@@ -267,9 +267,9 @@ export function SpaceDetailDisplay() {
             <li key={"example-" + i}>{example}</li>
         );
     });
-    const tagsElements = data.tags.map((tag, i) => {
+    const tagsElements = data.tags.map((tag) => {
         return (
-            <BootstrapBadge key={"tag-" + tag} type="primary" pill={true} className="me-1 mb-2">{tag}</BootstrapBadge>
+            <TagBadge key={"tag-" + tag} tag={tag} pill={true} className="me-1 mb-2" />
         );
     });
 

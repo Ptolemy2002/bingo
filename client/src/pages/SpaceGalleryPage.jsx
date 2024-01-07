@@ -7,7 +7,7 @@ import { useQuery } from "src/lib/Browser";
 import BootstrapButton, { BootstrapButtonLink } from "src/lib/Bootstrap/Button";
 import { BingoSpaceData, useBingoSpaceData } from "src/lib/BingoUtil";
 import BootstrapCard from "src/lib/Bootstrap/Card";
-import BootstrapBadge from "src/lib/Bootstrap/Badge";
+import TagBadge from "src/components/TagBadge";
 import BootstrapModal from "src/lib/Bootstrap/Modal";
 import MarkdownRenderer from "src/lib/Markdown";
 import { PageField } from "src/lib/Form";
@@ -524,9 +524,9 @@ export function SpaceCard({ name }={}) {
                 <li key={"example-" + i}>{example}</li>
             );
         });
-        const tagsElements = data.tags.map((tag, i) => {
+        const tagsElements = data.tags.map((tag) => {
             return (
-                <BootstrapBadge key={"tag-" + tag} type="primary" pill={true} className="me-1">{tag}</BootstrapBadge>
+                <TagBadge key={"tag-" + tag} tag={tag} pill={true} className="me-1" />
             );
         });
 
