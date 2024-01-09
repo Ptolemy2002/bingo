@@ -40,7 +40,22 @@ export function useMountEffect(callback) {
 export function combineClassNames(...classNames) {
     classNames = classNames.filter(c => c);
 
-    const individualClassNames = classNames.map(c => c.split(' ')).flat();
+    const individualClassNames = classNames
+        // Split each className by spaces
+        .map(c => {
+            if (Array.isArray(c)) c = combineClassNames(...c);
+            else if (typeof c !== "string") {
+                if (c?.toString) {
+                    c = c.toString();
+                } else {
+                    c = null;
+                }
+            }
+
+            return c?.split(' ');
+        }).flat().filter(c => c?.trim()); // Remove empty strings, nulls, undefineds, and whitespace-only strings
+
+
     const uniqueClassNames = [...new Set(individualClassNames)];
 
     return uniqueClassNames.join(' ');
