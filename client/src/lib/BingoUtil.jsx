@@ -2,7 +2,6 @@ import { useMountEffect, wrapNumber } from "src/lib/Misc";
 import { listsEqual, objectsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
-import { isBitOn, setBit, asBigInt } from "src/lib/Bitwise";
 
 export class Data {
     lastRequest = null;
@@ -416,7 +415,7 @@ function DataProvider({
     dataClass,
     children
 }={}) {
-    if (data) {
+    if (data !== undefined) {
         return <DataProviderData value={data} contextClass={contextClass}>{children}</DataProviderData>;
     } else {
         return <DataProviderUse value={value} primaryKey={primaryKey} onPullSuccess={onPullSuccess} onPullFailure={onPullFailure} contextClass={contextClass} dataClass={dataClass}>{children}</DataProviderUse>;
@@ -511,7 +510,7 @@ export class BingoBoardData extends Data {
     width = 5;
     height = 5;
     spaceNames = [];
-    markedMask = 0n;
+    markedMask = [];
     game = null;
     owner = null;
 
@@ -567,7 +566,7 @@ export class BingoBoardData extends Data {
             width: this.width,
             height: this.height,
             spaceNames: this.spaceNames.slice(),
-            markedMask: this.markedMask.toString(),
+            markedMask: this.markedMask.slice(),
             game: this.game,
             owner: this.owner
         };
@@ -579,21 +578,11 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("width")) this.width = boardState.width;
         if (boardState.hasOwnProperty("height")) this.height = boardState.height;
         if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
-        if (boardState.hasOwnProperty("markedMask")) this.markedMask = asBigInt(boardState.markedMask);
+        if (boardState.hasOwnProperty("markedMask")) this.markedMask = boardState.markedMask.slice();
         if (boardState.hasOwnProperty("game")) this.game = boardState.game;
         if (boardState.hasOwnProperty("owner")) this.owner = boardState.owner;
 
         return this;
-    }
-
-    markedMaskEquals(other) {
-        if (typeof other === "bigint") {
-            return this.markedMask === other;
-        } else if (other instanceof BingoBoardData) {
-            return this.markedMask === other.markedMask;
-        } else {
-            return this.markedMask === asBigInt(other);
-        }
     }
 
     jsonEquals(boardState) {
@@ -603,7 +592,7 @@ export class BingoBoardData extends Data {
         if (boardState.hasOwnProperty("width") && boardState.width !== this.width) return false;
         if (boardState.hasOwnProperty("height") && boardState.height !== this.height) return false;
         if (boardState.hasOwnProperty("spaceNames") && !listsEqual(boardState.spaceNames, this.spaceNames)) return false;
-        if (boardState.hasOwnProperty("markedMask") && this.markedMaskEquals(boardState.markedMask)) return false;
+        if (boardState.hasOwnProperty("markedMask") && !listsEqual(boardState.markedMask, this.markedMask)) return false;
         if (boardState.hasOwnProperty("game") && boardState.game !== this.game) return false;
         if (boardState.hasOwnProperty("owner") && boardState.owner !== this.owner) return false;
 
@@ -700,24 +689,24 @@ export class BingoBoardData extends Data {
     }
 
     getSpaceMarked({row, col, index, wrap = false}={}) {
-        if (index) return isBitOn(this.markedMask, this.validateIndex(index, wrap));
+        if (index) return this.markedMask[this.validateIndex(index, wrap)];
 
         row = this.validateRow(row, wrap);
         col = this.validateCol(col, wrap);
 
-        return isBitOn(this.markedMask, this.coordinatesToIndex(row, col));
+        return this.markedMask[this.coordinatesToIndex(row, col)];
     }
 
     setSpaceMarked({row, col, index, value, wrap = false}={}) {
         if (index) {
-            this.markedMask = setBit(this.markedMask, this.validateIndex(index, wrap), value);
+            this.markedMask[this.validateIndex(index, wrap)] = value;
             return this;
         }
 
         row = this.validateRow(row, wrap);
         col = this.validateCol(col, wrap);
 
-        this.markedMask = setBit(this.markedMask, this.coordinatesToIndex(row, col), value);
+        this.markedMask[this.coordinatesToIndex(row, col)] = value;
         return this;
     }
 

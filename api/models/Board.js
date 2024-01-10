@@ -44,9 +44,10 @@ const BoardSchema = new Schema({
     },
 
     markedMask: {
-        type: String,
-        match: /^[0-9]+n?$/,
-        required: true,
+        type: [Boolean],
+        required: function() {
+            return this.width * this.height === this.markedMask.length;
+        },
         minlength: 1
     },
 

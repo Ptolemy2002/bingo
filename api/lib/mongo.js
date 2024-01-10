@@ -61,7 +61,7 @@ async function update(collection, query, data, args) {
     // Remove _id from data if present
     if (data._id) delete data._id;
 
-    return await collection.updateMany(transformQuery(collection, query, args), data);
+    return await collection.updateMany(transformQuery(collection, query, args), data, { new: true });
 }
 
 async function count(collection, query={}, args={}) {

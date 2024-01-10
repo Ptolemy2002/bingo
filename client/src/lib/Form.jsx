@@ -101,7 +101,7 @@ export function EditField({
     }
 
     function handleKeyUp(event) {
-        if (manualSave && event.key === "Enter") {
+        if (manualSave && event.key === "Enter" && !event.shiftKey) {
             if (setValueHandler) setValueHandler(value);
         }
     }

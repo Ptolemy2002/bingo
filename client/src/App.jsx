@@ -2,15 +2,21 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { useCurrentPath, routes } from 'src/lib/Browser';
 import NotFoundPage from 'src/pages/NotFoundPage';
+import { combineClassNames } from 'src/lib/Misc';
+import { useCookies } from 'react-cookie';
+import { BingoGameDataProvider } from 'src/lib/BingoUtil';
+import GameDisplay from 'src/components/GameDisplay';
 
 export default function App() {
+    const [cookies] = useCookies(["currentGame"]);
+
     const routeElements = routes.map((route) => {
         return (
             <Route key={route.path} path={route.path} element={route.element} />
         );
     });
 
-    return (
+    const routerElement = (
         <Router>
             <Header title="Bingo App" />
             <main className="flex-grow-1">
@@ -22,6 +28,25 @@ export default function App() {
             <Footer />
         </Router>
     );
+
+    if (cookies.currentGame) {
+        return (
+            <BingoGameDataProvider
+                value={cookies.currentGame}
+                primaryKey="id"
+            >
+                {routerElement}
+            </BingoGameDataProvider>
+        );
+    } else {
+        return (
+            <BingoGameDataProvider
+                data={null}
+            >
+                {routerElement}
+            </BingoGameDataProvider>
+        );
+    }
 }
 
 function Header({
@@ -57,12 +82,19 @@ function Header({
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
-
+                    
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         {navItems}
                     </ul>
+
+                    <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <GameDisplay
+                            className="nav-item"
+                        />
+                    </ul>
                 </div>
+
             </nav>
         </header>
     );
@@ -73,10 +105,7 @@ function NavItem({
     text,
     active
 }={}) {
-    let className = "nav-link";
-    if (active) {
-        className += " active";
-    }
+    let className = combineClassNames("nav-link", active ? "active" : null)
 
     return (
         <li className="nav-item">
