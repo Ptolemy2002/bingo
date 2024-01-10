@@ -507,12 +507,45 @@ export function BingoGameDataProvider({
 export class BingoBoardData extends Data {
     id = null;
     name = "Unknown Board";
-    width = 5;
-    height = 5;
     spaceNames = [];
     markedMask = [];
+    _width = 5;
+    _height = 5;
     game = null;
     owner = null;
+
+    get width() {
+        return this._width;
+    }
+
+    set width(value) {
+        if (value < 1 || value > 11) throw new RangeError("Width must be between 1 and 11, inclusive.");
+        this._width = value;
+
+        if (this.spaceNames.length > this.height * this.width) {
+            this.spaceNames = this.spaceNames.slice(0, this.height * this.width);
+            this.markedMask = this.markedMask.slice(0, this.height * this.width);
+        }
+
+        this.fillEmptySpaces();
+    }
+
+    get height() {
+        return this._height;
+    }
+
+    set height(value) {
+        if (value < 1 || value > 11) throw new RangeError("Height must be between 1 and 11, inclusive.");
+
+        this._height = value;
+        
+        if (this.spaceNames.length > this.height * this.width) {
+            this.spaceNames = this.spaceNames.slice(0, this.height * this.width);
+            this.markedMask = this.markedMask.slice(0, this.height * this.width);
+        }
+
+        this.fillEmptySpaces();
+    }
 
     get spaces() {
         const result = [];
@@ -550,6 +583,7 @@ export class BingoBoardData extends Data {
         if (this.spaceNames.length < this.height * this.width) {
             for (let i = this.spaceNames.length; i < this.height * this.width; i++) {
                 this.spaceNames.push(nameFn(i));
+                this.markedMask.push(false);
             }
         }
         return this;
@@ -575,10 +609,10 @@ export class BingoBoardData extends Data {
     fromJSON(boardState) {
         if (boardState.hasOwnProperty("_id")) this.id = boardState._id;
         if (boardState.hasOwnProperty("name")) this.name = boardState.name;
-        if (boardState.hasOwnProperty("width")) this.width = boardState.width;
-        if (boardState.hasOwnProperty("height")) this.height = boardState.height;
         if (boardState.hasOwnProperty("spaceNames")) this.spaceNames = boardState.spaceNames.slice();
         if (boardState.hasOwnProperty("markedMask")) this.markedMask = boardState.markedMask.slice();
+        if (boardState.hasOwnProperty("width")) this.width = boardState.width;
+        if (boardState.hasOwnProperty("height")) this.height = boardState.height;
         if (boardState.hasOwnProperty("game")) this.game = boardState.game;
         if (boardState.hasOwnProperty("owner")) this.owner = boardState.owner;
 
