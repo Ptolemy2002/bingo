@@ -12,7 +12,7 @@ const customTags = [
 const lightTags = [
     "basically-free",
     "uncommon",
-    "legendary",
+    "rare",
 ];
 
 export default function TagBadge({
