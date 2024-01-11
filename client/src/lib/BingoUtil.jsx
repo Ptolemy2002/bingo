@@ -522,9 +522,9 @@ export class BingoBoardData extends Data {
         if (value < 1 || value > 11) throw new RangeError("Width must be between 1 and 11, inclusive.");
         this._width = value;
 
-        if (this.spaceNames.length > this.height * this.width) {
-            this.spaceNames = this.spaceNames.slice(0, this.height * this.width);
-            this.markedMask = this.markedMask.slice(0, this.height * this.width);
+        if (this.spaceNames.length > this.size) {
+            this.spaceNames = this.spaceNames.slice(0, this.size);
+            this.markedMask = this.markedMask.slice(0, this.size);
         }
 
         this.fillEmptySpaces();
@@ -539,17 +539,21 @@ export class BingoBoardData extends Data {
 
         this._height = value;
         
-        if (this.spaceNames.length > this.height * this.width) {
-            this.spaceNames = this.spaceNames.slice(0, this.height * this.width);
-            this.markedMask = this.markedMask.slice(0, this.height * this.width);
+        if (this.spaceNames.length > this.size) {
+            this.spaceNames = this.spaceNames.slice(0, this.size);
+            this.markedMask = this.markedMask.slice(0, this.size);
         }
 
         this.fillEmptySpaces();
     }
 
+    get size() {
+        return this.width * this.height;
+    }
+
     get spaces() {
         const result = [];
-        for (let i = 0; i < this.height * this.width; i++) {
+        for (let i = 0; i < this.size; i++) {
             result.push(this.getSpace({index: i}));
         }
         return result;
@@ -580,8 +584,8 @@ export class BingoBoardData extends Data {
     }
 
     fillEmptySpaces(nameFn = (i) => `Space ${i + 1}`) {
-        if (this.spaceNames.length < this.height * this.width) {
-            for (let i = this.spaceNames.length; i < this.height * this.width; i++) {
+        if (this.spaceNames.length < this.size) {
+            for (let i = this.spaceNames.length; i < this.size; i++) {
                 this.spaceNames.push(nameFn(i));
                 this.markedMask.push(false);
             }
@@ -636,7 +640,7 @@ export class BingoBoardData extends Data {
     validateIndex(i, wrap = false) {
         if (wrap) {
             return this.wrapIndex(i);
-        } else if (i < 0 || i >= this.height * this.width) {
+        } else if (i < 0 || i >= this.size) {
             throw new RangeError("Index out of range. Use the wrap argument to handle this error by wrapping around the board.");
         }
 
@@ -664,7 +668,7 @@ export class BingoBoardData extends Data {
     }
 
     wrapIndex(index) {
-        return wrapNumber(index, 0, this.height * this.width - 1);
+        return wrapNumber(index, 0, this.size - 1);
     }
 
     wrapRow(row) {
