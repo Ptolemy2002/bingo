@@ -79,9 +79,7 @@ export class Data {
     }
 
     lastCheckpointIndex(type=null, start) {
-        if (type === null) return this.previousStates.length - 2;
-
-        start = start || this.stateIndex;
+        start = start || this.stateIndex - 1;
         for (let i = start; i >= 0; i--) {
             if (this.checkpointTypeMatches(this.previousStates[i], type)) return i;
         }
@@ -95,11 +93,11 @@ export class Data {
         return this.previousStates[index];
     }
 
-    countCheckpoints(type=null, max=Infinity) {
+    countCheckpoints(type=null, { max=Infinity - 1, min=0}={}) {
         if (type === null) return this.previousStates.length;
 
         let count = 0;
-        for (let i = 0; i < Math.min(this.previousStates.length, max); i++) {
+        for (let i = min; i < Math.min(this.previousStates.length, max + 1); i++) {
             if (this.checkpointTypeMatches(this.previousStates[i], type)) count++;
         }
 
@@ -107,7 +105,7 @@ export class Data {
     }
 
     undo(steps = 1, type=null) {
-        if (this.countCheckpoints(type) === 0) return this;
+        if (this.countCheckpoints(type, {max: this.stateIndex}) === 0) return this;
 
         let index = this.stateIndex;
         for (let i = 0; i < steps; i++) {
@@ -123,7 +121,7 @@ export class Data {
     }
 
     redo(steps = 1, type=null) {
-        if (this.countCheckpoints(type) === 0) return this;
+        if (this.countCheckpoints(type, {min: this.stateIndex + 1}) === 0) return this;
 
         let index = this.stateIndex;
         for (let i = 0; i < steps; i++) {
@@ -140,6 +138,10 @@ export class Data {
 
     revert(type=null) {
         return this.undo(1, type);
+    }
+
+    difference(type=null) {
+        return this.toJSON();
     }
 
     checkpoint(type) {
@@ -199,7 +201,7 @@ export class Data {
         this._initRequest("push");
         this.abortController = this._push({
             method: "PUT",
-            body: this.toJSON(),
+            body: this.difference(["push", "pull"]),
             onSuccess: (data) => {
                 this._requestSuccess("push");
                 if (isCallable(onSuccess)) onSuccess(data);

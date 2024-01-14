@@ -19,7 +19,6 @@ export default function GameDisplay({
 
             <BootstrapButton
                 type="secondary"
-                oultine={true}
             >
                 {
                     bingoGameData ? (

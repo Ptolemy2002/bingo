@@ -44,7 +44,10 @@ const BoardSchema = new Schema({
     },
 
     markedMask: {
-        type: [Boolean],
+        type: [{
+            type: Boolean,
+            default: false
+        }],
         required: function() {
             return this.width * this.height === this.markedMask.length;
         },
