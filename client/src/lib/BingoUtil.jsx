@@ -2,6 +2,7 @@ import { useMountEffect, wrapNumber } from "src/lib/Misc";
 import { listsEqual, objectsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
+import isCallable from "is-callable";
 
 export class Data {
     lastRequest = null;
@@ -201,12 +202,12 @@ export class Data {
             body: this.toJSON(),
             onSuccess: (data) => {
                 this._requestSuccess("push");
-                if (onSuccess) onSuccess(data);
+                if (isCallable(onSuccess)) onSuccess(data);
             },
 
             onFailure: (err) => {
                 this._requestFailed(err);
-                if (onFailure) onFailure(err);
+                if (isCallable(onFailure)) onFailure(err);
             }
         });
 
@@ -230,7 +231,7 @@ export class Data {
                         const err = new Error("No data returned from server.");
                         err.is404 = true;
                         this._requestFailed(err);
-                        if (onFailure) onFailure(err);
+                        if (isCallable(onFailure)) onFailure(err);
                         return;
                     }
                     
@@ -240,12 +241,12 @@ export class Data {
                 }
 
                 this._requestSuccess("pull");
-                if (onSuccess) onSuccess(data);
+                if (isCallable(onSuccess)) onSuccess(data);
             },
 
             onFailure: (err) => {
                 this._requestFailed(err);
-                if (onFailure) onFailure(err);
+                if (isCallable(onFailure)) onFailure(err);
             }
         });
 
@@ -267,12 +268,12 @@ export class Data {
             body: this.toJSON(),
             onSuccess: (data) => {
                 this._requestSuccess("duplicate");
-                if (onSuccess) onSuccess(data);
+                if (isCallable(onSuccess)) onSuccess(data);
             },
 
             onFailure: (err) => {
                 this._requestFailed(err);
-                if (onFailure) onFailure(err);
+                if (isCallable(onFailure)) onFailure(err);
             }
         });
 
@@ -293,12 +294,12 @@ export class Data {
             method: "DELETE",
             onSuccess: (data) => {
                 this._requestSuccess("delete");
-                if (onSuccess) onSuccess(data);
+                if (isCallable(onSuccess)) onSuccess(data);
             },
 
             onFailure: (err) => {
                 this._requestFailed(err);
-                if (onFailure) onFailure(err);
+                if (isCallable(onFailure)) onFailure(err);
             }
         });
 

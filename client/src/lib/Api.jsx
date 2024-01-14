@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { isNullOrUndefined } from "./Misc";
+import isCallable from "is-callable";
 
 export function useApi(path, sort=false, sortFunc=null) {
     const [data, setData] = useState(null);
@@ -41,7 +42,7 @@ export function useApi(path, sort=false, sortFunc=null) {
             setData(data);
             setCompleted(true);
             setStarted(false);
-            if (_onSuccess) _onSuccess(data);
+            if (isCallable(_onSuccess)) _onSuccess(data);
         }
 
         function onFailure(err) {
@@ -51,11 +52,11 @@ export function useApi(path, sort=false, sortFunc=null) {
             setCompleted(true);
             setError(err);
             setStarted(false);
-            if (_onFailure) _onFailure(err);
+            if (isCallable(_onFailure)) _onFailure(err);
         }
 
         function onCompletion() {
-            if (_onCompletion) onCompletion(data, failed, error);
+            if (isCallable(_onCompletion)) onCompletion(data, failed, error);
         }
 
         const options = {method, queryParams};

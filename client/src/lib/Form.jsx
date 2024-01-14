@@ -6,6 +6,7 @@ import { useForceRerender, clamp } from "src/lib/Misc";
 import  BootstrapButton from "src/lib/Bootstrap/Button";
 import { nanoid } from "nanoid";
 import { cleanString } from "src/lib/Regex";
+import isCallable from "is-callable";
 
 export function EditField({
     name,
@@ -102,7 +103,7 @@ export function EditField({
 
     function handleKeyUp(event) {
         if (manualSave && event.key === "Enter" && !event.shiftKey) {
-            if (setValueHandler) setValueHandler(value);
+            if (isCallable(setValueHandler)) setValueHandler(value);
         }
     }
 
@@ -150,7 +151,7 @@ export function EditField({
                     <BootstrapButton
                         type="secondary"
                         outline={true} 
-                        onClick={() => {if (setValueHandler) setValueHandler(value)}}
+                        onClick={() => {if (isCallable(setValueHandler)) setValueHandler(value)}}
                     >
                         {saveText}
                     </BootstrapButton>
@@ -390,7 +391,7 @@ export function FieldList({
 
     function set(index, value) {
         listRef.current = listSet(listRef.current, index, value);
-        if (setListHandler) setListHandler(listRef.current);
+        if (isCallable(setListHandler)) setListHandler(listRef.current);
     }
 
     function remove(index) {
@@ -398,7 +399,7 @@ export function FieldList({
         typeListRef.current = listRemove(typeListRef.current, index);
         keysListRef.current = listRemove(keysListRef.current, index);
 
-        if (setListHandler) setListHandler(listRef.current);
+        if (isCallable(setListHandler)) setListHandler(listRef.current);
         forceRerender();
     }
 
@@ -409,7 +410,7 @@ export function FieldList({
         typeListRef.current = listSwap(typeListRef.current, index, index - 1);
         keysListRef.current = listSwap(keysListRef.current, index, index - 1);
 
-        if (setListHandler) setListHandler(listRef.current);
+        if (isCallable(setListHandler)) setListHandler(listRef.current);
         forceRerender();
     }
 
@@ -420,7 +421,7 @@ export function FieldList({
         typeListRef.current = listSwap(typeListRef.current, index, index + 1);
         keysListRef.current = listSwap(keysListRef.current, index, index + 1);
 
-        if (setListHandler) setListHandler(listRef.current);
+        if (isCallable(setListHandler)) setListHandler(listRef.current);
         forceRerender();
     }
 
@@ -429,7 +430,7 @@ export function FieldList({
         typeListRef.current = listPush(typeListRef.current, type);
         keysListRef.current = listPush(keysListRef.current, nanoid());
 
-        if (setListHandler) setListHandler(listRef.current);
+        if (isCallable(setListHandler)) setListHandler(listRef.current);
         forceRerender();
     }
 
