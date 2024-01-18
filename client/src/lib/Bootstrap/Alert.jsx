@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, memo } from "react";
 import { combineClassNames, useMountEffect, clamp } from "src/lib/Misc";
 import { Link } from "react-router-dom";
 
@@ -51,7 +51,7 @@ export default function BootstrapAlert({
     );
 }
 
-export function BootstrapAlertHeading({
+export const BootstrapAlertHeading = memo(function({
     hLevel = 4,
     className = null,
     children,
@@ -69,9 +69,9 @@ export function BootstrapAlertHeading({
             {children}
         </HTag>
     );
-}
+});
 
-export function BootstrapAlertLink({
+export const BootstrapAlertLink = memo(function({
     className = null,
     children,
     ...props
@@ -87,7 +87,7 @@ export function BootstrapAlertLink({
             {children}
         </Link>
     );
-}
+});
 
 // This is done so that we can import only the BootstrapAlert component and still have access to the other related components
 BootstrapAlert.Heading = BootstrapAlertHeading;

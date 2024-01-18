@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import Markdown from "react-markdown";
 import { Link } from "react-router-dom";
 import BootstrapButton from "./Bootstrap/Button";
@@ -8,13 +8,13 @@ import remarkMath from "remark-math";
 import { combineClassNames, clamp } from "src/lib/Misc";
 import { wrapSelection } from "src/lib/Form";
 
-export function MarkdownLink({ node, href, children, ...props }={}) {
+export const MarkdownLink = memo(function({ node, href, children, ...props }={}) {
     return (
         <Link to={href} {...props} target="_blank" rel="noopener noreferrer">{children}</Link>
     );
-}
+});
 
-export default function MarkdownRenderer({ baseHLevel=1, children, components, ...props }={}) {
+function MarkdownRenderer({ baseHLevel=1, children, components, ...props }={}) {
     const hLevelOverride = {};
     baseHLevel = clamp(baseHLevel, 1, 6);
 
@@ -41,6 +41,7 @@ export default function MarkdownRenderer({ baseHLevel=1, children, components, .
         </Markdown>
     );
 }
+export default memo(MarkdownRenderer);
 
 export function MarkdownEditorButtons({ elementRef, show: initShow, className, ...props }={}) {
     const [show, setShow] = useState(initShow);

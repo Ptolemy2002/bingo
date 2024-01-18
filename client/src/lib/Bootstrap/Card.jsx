@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import { combineClassNames, clamp } from "src/lib/Misc";
 
-export default function BootstrapCard({
+const BootstrapCard = memo(function BootstrapCard({
     className = null,
     children,
     ...props
@@ -16,9 +16,10 @@ export default function BootstrapCard({
             {children}
         </div>
     );
-}
+});
+export default BootstrapCard;
 
-export function BootstrapCardBody({
+export const BootstrapCardBody = memo(function({
     className = null,
     children,
     ...props
@@ -34,9 +35,9 @@ export function BootstrapCardBody({
             {children}
         </div>
     );
-}
+});
 
-export function BootstrapCardTitle({
+export const BootstrapCardTitle = memo(function({
     className = null,
     hLevel = 5,
     children,
@@ -53,9 +54,9 @@ export function BootstrapCardTitle({
             {children}
         </HTag>
     );
-}
+});
 
-export function BootstapCardSubtitle({
+export const BootstapCardSubtitle = memo(function({
     className = null,
     hLevel = 6,
     children,
@@ -72,9 +73,9 @@ export function BootstapCardSubtitle({
             {children}
         </HTag>
     );
-}
+});
 
-export function BootstrapCardText({
+export const BootstrapCardText = memo(function({
     className = null,
     children,
     ...props
@@ -89,9 +90,9 @@ export function BootstrapCardText({
             {children}
         </div>
     );
-}
+});
 
-export function BootstrapCardImage({
+export const BootstrapCardImage = memo(function({
     className = null,
     position = "top",
     ...props
@@ -105,7 +106,7 @@ export function BootstrapCardImage({
     return (
         <img {...newProps} /> // eslint-disable-line jsx-a11y/alt-text
     );
-}
+});
 
 // This is done so that we can import only the BootstrapCard component and still have access to the other related components
 BootstrapCard.Body = BootstrapCardBody;

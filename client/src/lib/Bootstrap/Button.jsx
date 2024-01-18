@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { combineClassNames } from "src/lib/Misc";
 import { Link } from "react-router-dom";
 
-export default function BootstrapButton({
+export default memo(function BootstrapButton({
     onClick,
     type = "primary",
     className = null,
@@ -25,9 +26,9 @@ export default function BootstrapButton({
     return (
         <button {...newProps}>{children}</button>
     );
-}
+});
 
-export function BootstrapButtonLink({
+export const BootstrapButtonLink = memo(function({
     to,
     type = "primary",
     className = null,
@@ -51,4 +52,4 @@ export function BootstrapButtonLink({
     return (
         <Link {...newProps}>{children}</Link>
     );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { combineClassNames } from "src/lib/Misc";
 
 const lightBgTypes = [
@@ -6,7 +7,7 @@ const lightBgTypes = [
     "light",
 ];
 
-export default function BootstrapBadge({
+export default memo(function BootstrapBadge({
     type = "primary",
     pill = false,
     children,
@@ -29,4 +30,4 @@ export default function BootstrapBadge({
             {children}
         </span>
     );
-}
+});

@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { combineClassNames, clamp } from "src/lib/Misc";
 import BootstrapButton from "src/lib/Bootstrap/Button";
 
-export default function BootstrapModal({
+const BootstrapModal = memo(function({
     id,
     children,
     className,
@@ -27,9 +28,10 @@ export default function BootstrapModal({
             </div>
         </div>
     )
-}
+});
+export default BootstrapModal;
 
-export function BootstrapModalHeader({
+export const BootstrapModalHeader = memo(function({
     hLevel = 5,
     children,
     className,
@@ -52,9 +54,9 @@ export function BootstrapModalHeader({
             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
         </div>
     );
-}
+});
 
-export function BootstrapModalBody({
+export const BootstrapModalBody = memo(function({
     children,
     className,
     ...props
@@ -72,9 +74,9 @@ export function BootstrapModalBody({
             {children}
         </div>
     );
-}
+});
 
-export function BootstrapModalFooter({
+export const BootstrapModalFooter = memo(function({
     children,
     className,
     cancelProps = {},
@@ -100,9 +102,9 @@ export function BootstrapModalFooter({
             </BootstrapButton>
         </div>
     );
-}
+});
 
-export function BootstrapModalActivateButton(
+export const BootstrapModalActivateButton = memo(function(
     {
         modalId,
         children,
@@ -122,7 +124,7 @@ export function BootstrapModalActivateButton(
             {children}
         </BootstrapButton>
     );
-}
+});
 
 BootstrapModal.Header = BootstrapModalHeader;
 BootstrapModal.Body = BootstrapModalBody;

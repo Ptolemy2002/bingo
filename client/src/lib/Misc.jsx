@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
 
 export function listInPlainEnglish(list, {max = undefined, conjunction = "and"}={}) {
     if (max === undefined) max = list.length;
@@ -72,10 +72,10 @@ export function useForceRerender() {
     return update;
 }
 
-export function Spacer({ size = "1rem", horizontal = false }={}) {
+export const Spacer = memo(function({ size = "1rem", horizontal = false }={}) {
     const keyName = horizontal ? "width" : "height";
     return <div className="spacer" style={{ [keyName]: size }} />;
-}
+});
 
 export function clamp(value, min, max) {
     if (!isNullOrUndefined(min) && value < min) return min;
