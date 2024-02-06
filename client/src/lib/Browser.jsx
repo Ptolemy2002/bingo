@@ -1,43 +1,42 @@
 import { useMemo } from "react";
-import { matchRoutes, useLocation } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { WrapPage } from "src/App";
 import  HomePage from "src/pages/HomePage";
 import SpaceGalleryPage from "src/pages/SpaceGalleryPage";
 import SpaceDetailPage from "src/pages/SpaceDetailPage";
+import NotFoundPage from "src/pages/NotFoundPage";
 
-export const routes = [
+export const router = createBrowserRouter([
     {
         path: "/",
-        navigationText: "Home",
-        element: <HomePage />
+        element: <WrapPage><HomePage /></WrapPage>,
+        errorElement: <NotFoundPage />,
     },
 
     {
         path: "/space-gallery",
-        navigationText: "Space Gallery",
-        element: <SpaceGalleryPage />
+        element: <WrapPage><SpaceGalleryPage /></WrapPage>,
     },
 
     {
         path: "/space/:name",
-        element: <SpaceDetailPage />
+        element: <WrapPage><SpaceDetailPage /></WrapPage>,
     },
-
-    {
-        path: "/space/:name/edit",
-        element: <SpaceDetailPage editMode={true} />
-    }
-];
-
-export const useCurrentPath = () => {
-    const location = useLocation();
-    const [{ route }] = matchRoutes(routes, location) || [{route: null}];
-
-    // The question mark is the optional chaining operator. If route is null, then
-    // the expression will evaluate to null.
-    return route?.path
-}
+]);
 
 export function useQuery() {
     const location = useLocation();
     return useMemo(() => new URLSearchParams(location.search), [location]);
+}
+
+export function pathToNavText(path) {
+    switch (path) {
+        case "/":
+            return "Home";
+        case "/space-gallery":
+            return "Space Gallery";
+        default:
+            return null;
+    }
 }

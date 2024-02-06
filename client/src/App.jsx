@@ -1,33 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import { useCurrentPath, routes } from 'src/lib/Browser';
-import NotFoundPage from 'src/pages/NotFoundPage';
+import { Link, NavLink, RouterProvider } from 'react-router-dom';
+import { pathToNavText, router } from 'src/lib/Browser';
 import { combineClassNames } from 'src/lib/Misc';
 import { useCookies } from 'react-cookie';
 import { BingoGameDataProvider } from 'src/lib/BingoUtil';
 import GameDisplay from 'src/components/GameDisplay';
 
-export default function App() {
+export function WrapPage({
+    children
+}={}) {
     const [cookies] = useCookies(["currentGame"]);
-
-    const routeElements = routes.map((route) => {
-        return (
-            <Route key={route.path} path={route.path} element={route.element} />
-        );
-    });
-
-    const routerElement = (
-        <Router>
-            <Header title="Bingo App" />
-            <main className="flex-grow-1">
-                <Routes>
-                    {routeElements}
-                    <Route key="404" path="*" element={<NotFoundPage />} />
-                </Routes>
-            </main>
-            <Footer />
-        </Router>
-    );
+    
+    const routerElements = [
+        <Header title="Bingo App" key="head" />,
+        <main className="flex-grow-1" key="body">
+            {children}
+        </main>,
+        <Footer key="foot" />
+    ];
 
     if (cookies.currentGame) {
         return (
@@ -35,7 +25,7 @@ export default function App() {
                 value={cookies.currentGame}
                 primaryKey="id"
             >
-                {routerElement}
+                {routerElements}
             </BingoGameDataProvider>
         );
     } else {
@@ -43,26 +33,29 @@ export default function App() {
             <BingoGameDataProvider
                 data={null}
             >
-                {routerElement}
+                {routerElements}
             </BingoGameDataProvider>
         );
     }
 }
 
+export default function App() {
+    return (
+        <RouterProvider router={router} />
+    );
+}
+
 function Header({
     title
 }={}) {
-    const currentPath = useCurrentPath();
-
-    const navItems = routes.map((route) => {
-        if (!route.navigationText) return null;
+    const navItems = router.routes.map((route) => {
+        if (!pathToNavText(route.path)) return null;
         
         return (
             <NavItem
                 key={route.path}
                 path={route.path}
-                text={route.navigationText}
-                active={currentPath === route.path}
+                text={pathToNavText(route.path)}
             />
         );
     });
@@ -102,14 +95,11 @@ function Header({
 
 function NavItem({
     path,
-    text,
-    active
+    text
 }={}) {
-    let className = combineClassNames("nav-link", active ? "active" : null)
-
     return (
         <li className="nav-item">
-            <Link to={path} className={className}>{text}</Link>
+            <NavLink to={path} className={({isActive}) => combineClassNames("nav-link", isActive ? "active" : null)}>{text}</NavLink>
         </li>
     );
 }
