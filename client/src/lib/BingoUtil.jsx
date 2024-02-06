@@ -1,5 +1,5 @@
 import { useMountEffect, wrapNumber } from "src/lib/Misc";
-import { listsEqual, objectsEqual } from "src/lib/List";
+import { listDifference, listsEqual, objectsEqual } from "src/lib/List";
 import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
 import isCallable from "is-callable";
@@ -869,6 +869,38 @@ export class BingoSpaceData extends Data {
         if (spaceState.hasOwnProperty("tags") && !listsEqual(spaceState.tags, this.tags)) return false;
 
         return true;
+    }
+
+    difference(type=null) {
+        const previous = this.lastCheckpoint(type);
+        if (previous === null) return this.toJSON();
+
+        function lDiff(key, self) {
+            if (!previous[key]) return {};
+            return listDifference(previous[key], self[key], (i) => `${key}.${i}`);
+        }
+
+        const result = {
+            ...lDiff("examples", this),
+            ...lDiff("aliases", this),
+            ...lDiff("tags", this)
+        };
+
+        if (previous._id !== this.id) result.id = this.id;
+        if (previous.name !== this.name) result.name = this.name;
+        if (previous.description !== this.description) result.description = this.description;
+
+        // If any of the keys are undefined, change it to be included in pull
+        const unset = {};
+        Object.keys(result).forEach((key) => {
+            if (result[key] === undefined) {
+                unset[key] = true;
+                delete result[key];
+            }
+        });
+
+        if (Object.keys(unset).length > 0) result.$unset = unset;
+        return result;
     }
 }
 

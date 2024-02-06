@@ -1,3 +1,5 @@
+import isCallable from "is-callable";
+
 export function listsEqual(a, b) {
     if (a === b) return true;
     if (!a || !b) return false;
@@ -65,4 +67,24 @@ export function isSet(list) {
         seen.push(list[i]);
     }
     return true;
+}
+
+export function listDifference(a, b, keyConvert=null, valueConvert=null) {
+    if (!isCallable(keyConvert)) keyConvert = (x) => x;
+    if (!isCallable(valueConvert)) valueConvert = (x) => x;
+
+    const result = {};
+    a.forEach((element, i) => {
+        if (b[i] !== element) {
+            result[keyConvert(i)] = valueConvert(b[i]);
+        }
+    });
+
+    if (b.length > a.length) {
+        for (let i = a.length; i < b.length; i++) {
+            result[keyConvert(i)] = valueConvert(b[i]);
+        }
+    }
+
+    return result;
 }

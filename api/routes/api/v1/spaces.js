@@ -217,7 +217,9 @@ async function newSpace(data) {
 }
 
 async function updateSpace(query, data) {
-    const result = await mongo.update(SpaceModel, query, data, {});
+    await mongo.update(SpaceModel, query, data, {});
+    // Pull null values from arrays
+    const result = await mongo.update(SpaceModel, query, { $pull: { examples: null, aliases: null, tags: null } }, {});
     return result;
 }
 
