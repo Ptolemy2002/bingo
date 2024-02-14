@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { isNullOrUndefined } from "./Misc";
+import { isNullOrUndefined } from "src/lib/Misc";
 import isCallable from "is-callable";
+
+const API_URL = (process.env.NODE_ENV === "production" && process.env.REACT_APP_API_URL) || "http://localhost:8080";
 
 export function useApi(path, sort=false, sortFunc=null) {
     const [data, setData] = useState(null);
@@ -8,11 +10,6 @@ export function useApi(path, sort=false, sortFunc=null) {
     const [completed, setCompleted] = useState(false);
     const [failed, setFailed] = useState(false);
     const [error, setError] = useState(null);
-
-    let root = "http://localhost:8080";
-    if (process.env.NODE_ENV === "production" && process.env.REACT_APP_API_URL) {
-        root = process.env.REACT_APP_API_URL;
-    }
 
     function sendRequest({
         onSuccess: _onSuccess = null,
@@ -92,7 +89,7 @@ export function useApi(path, sort=false, sortFunc=null) {
             fullPath += "?" + queryString;
         }
 
-        fetch(`${root}/api/v1/${fullPath}`, options)
+        fetch(`${API_URL}/api/v1/${fullPath}`, options)
             .then((res) => res.json())
             .catch((err) => {
                 onFailure(err);
