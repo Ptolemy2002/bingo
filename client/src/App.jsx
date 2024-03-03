@@ -1,20 +1,18 @@
 import React from 'react';
-import { Link, NavLink, RouterProvider } from 'react-router-dom';
+import { Link, NavLink, Outlet, RouterProvider } from 'react-router-dom';
 import { pathToNavText, router } from 'src/lib/Browser';
 import { combineClassNames } from 'src/lib/Misc';
 import { useCookies } from 'react-cookie';
 import { BingoGameDataProvider } from 'src/lib/BingoUtil';
 import GameDisplay from 'src/components/GameDisplay';
 
-export function WrapPage({
-    children
-}={}) {
+export function PageLayout() {
     const [cookies] = useCookies(["currentGame"]);
     
     const routerElements = [
         <Header title="Bingo App" key="head" />,
         <main className="flex-grow-1" key="body">
-            {children}
+            <Outlet />
         </main>,
         <Footer key="foot" />
     ];
@@ -48,7 +46,7 @@ export default function App() {
 function Header({
     title
 }={}) {
-    const navItems = router.routes.map((route) => {
+    const navItems = router.getRoutes().map((route) => {
         if (!pathToNavText(route.path)) return null;
         
         return (
@@ -87,7 +85,6 @@ function Header({
                         />
                     </ul>
                 </div>
-
             </nav>
         </header>
     );

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { WrapPage } from "src/App";
+import { PageLayout } from "src/App";
 import  HomePage from "src/pages/HomePage";
 import SpaceGalleryPage from "src/pages/SpaceGalleryPage";
 import SpaceDetailPage from "src/pages/SpaceDetailPage";
@@ -10,20 +10,35 @@ import NotFoundPage from "src/pages/NotFoundPage";
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <WrapPage><HomePage /></WrapPage>,
-        errorElement: <NotFoundPage />,
-    },
+        element: <PageLayout />,
+        children: [
+            {
+                path: "/",
+                element: <HomePage />
+            },
 
-    {
-        path: "/space-gallery",
-        element: <WrapPage><SpaceGalleryPage /></WrapPage>,
-    },
+            {
+                path: "/space-gallery",
+                element: <SpaceGalleryPage />
+            },
 
-    {
-        path: "/space/:name",
-        element: <WrapPage><SpaceDetailPage /></WrapPage>,
-    },
+            {
+                path: "/space/:name",
+                element: <SpaceDetailPage />
+            },
+
+            {
+                path: "*",
+                element: <NotFoundPage />
+            }
+        ]
+    }
 ]);
+
+// A simple utility to loop through each route object.
+router.getRoutes = function() {
+    return router.routes[0].children;
+};
 
 export function useQuery() {
     const location = useLocation();
