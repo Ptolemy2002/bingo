@@ -28,6 +28,11 @@ export const router = createBrowserRouter([
             },
 
             {
+                path: "/space/:name/edit",
+                element: <SpaceDetailPage editMode={true} />
+            },
+
+            {
                 path: "*",
                 element: <NotFoundPage />
             }
